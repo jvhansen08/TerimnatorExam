@@ -1,6 +1,6 @@
 # TerimnatorExam
 
-![Terminator](./Terimnator.jpg "Terminator")
+![Terminator](./Images/Terimnator.jpeg "Terminator")
 
 ```
                   ,
