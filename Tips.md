@@ -35,3 +35,26 @@ Question 8:
 - Classify images using whatever we want (Ex. ResNet, GoogleNet)
 - Deploy YOLO on the raspberry Pi
 - D shouldn’t be too much of an additional burden
+
+
+
+# Stamp
+                  ,
+               ,  ;:._.-`''.
+             ;.;'.;`      _ `.
+              ',;`       ( \ ,`-.  
+           `:.`,         (_/ ;\  `-.
+            ';:              / `.   `-._
+          `;.;'              `-,/ .     `-.
+          ';;'              _    `^`       `.
+         ';;            ,'-' `--._          ;
+':      `;;        ,;     `.    ':`,,.__,,_ /
+ `;`:;`;:`       ,;  '.    ;,      ';';':';;`
+              .,; '    '-._ `':.;    
+            .:; `          '._ `';;,
+          ;:` `    :'`'       ',__.)
+        `;:;:.,...;'`'
+      ';. '`'::'`''  .'`'
+    ,'   `';;:,..::;`'`'
+, .;`      `'::''`
+,`;`.
