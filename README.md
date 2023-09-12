@@ -1,5 +1,9 @@
 # TerimnatorExam
 
+# Setup
+
+`pip install -r requirements.txt`
+
 ![Terminator](./Images/Terimnator.jpeg "Terminator")
 
 ```
