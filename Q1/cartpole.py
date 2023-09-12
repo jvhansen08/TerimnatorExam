@@ -9,6 +9,7 @@ import gym
 from gym import spaces, logger
 from gym.utils import seeding
 import numpy as np
+from pyglet.gl import *
 
 
 class CartPoleEnv(gym.Env):
@@ -55,10 +56,10 @@ class CartPoleEnv(gym.Env):
 
     def __init__(self):
         self.gravity = 9.8
-        self.masscart = 1.0
-        self.masspole = 0.1
+        self.masscart = 3.0
+        self.masspole = 0.0
         self.total_mass = self.masspole + self.masscart
-        self.length = 0.5  # actually half the pole's length
+        self.length = 0.4  # actually half the pole's length
         self.polemass_length = self.masspole * self.length
         self.force_mag = 10.0
         self.tau = 0.02  # seconds between state updates
@@ -105,10 +106,10 @@ class CartPoleEnv(gym.Env):
         # For the interested reader:
         # https://coneural.org/florian/papers/05_cart_pole.pdf
         temp = (
-            force + self.polemass_length * theta_dot ** 2 * sintheta
+            force + self.polemass_length * theta_dot**2 * sintheta
         ) / self.total_mass
         thetaacc = (self.gravity * sintheta - costheta * temp) / (
-            self.length * (4.0 / 3.0 - self.masspole * costheta ** 2 / self.total_mass)
+            self.length * (4.0 / 3.0 - self.masspole * costheta**2 / self.total_mass)
         )
         xacc = temp - self.polemass_length * thetaacc * costheta / self.total_mass
 
@@ -225,3 +226,56 @@ class CartPoleEnv(gym.Env):
         if self.viewer:
             self.viewer.close()
             self.viewer = None
+
+
+def controller():
+    # Create the CartPole environment
+    env = gym.make("CartPole-v1")
+
+    # PD controller gains
+    Kp = 1.0  # Proportional gain
+    Kd = 0.1  # Derivative gain
+
+    # Simulation parameters
+    num_episodes = 100
+    max_steps = 1000
+
+    for episode in range(num_episodes):
+        state = env.reset()
+        total_reward = 0
+
+        for step in range(max_steps):
+            # Extract state information
+            cart_position, cart_velocity, pole_angle, pole_angular_velocity = state
+
+            # Calculate control action (PD controller)
+            error = pole_angle  # Error is the pole angle from the vertical position
+            error_derivative = pole_angular_velocity
+            control_action = Kp * error + Kd * error_derivative
+
+            # Apply the control action (push cart left or right)
+            if control_action > 0:
+                action = 1  # Push cart to the right
+            else:
+                action = 0  # Push cart to the left
+
+            # Step forward in the environment
+            state, reward, done, _ = env.step(action)
+
+            # Accumulate total reward
+            total_reward += reward
+
+            # Render the environment (optional)
+            env.render()
+
+            if done:
+                break
+
+        print(f"Episode {episode + 1}: Total Reward = {total_reward}")
+
+    # Close the environment when done
+    env.close()
+
+
+if __name__ == "__main__":
+    controller()
