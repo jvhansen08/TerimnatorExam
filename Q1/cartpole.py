@@ -9,7 +9,7 @@ import gym
 from gym import spaces, logger
 from gym.utils import seeding
 import numpy as np
-from pyglet.gl import *
+from pyglet import *
 
 
 class CartPoleEnv(gym.Env):
@@ -272,7 +272,6 @@ def controller():
                 break
 
         print(f"Episode {episode + 1}: Total Reward = {total_reward}")
-
     # Close the environment when done
     env.close()
 
