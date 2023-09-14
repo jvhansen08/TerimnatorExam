@@ -10,6 +10,7 @@ import gym
 from gym import logger, spaces
 from gym.envs.classic_control import utils
 from gym.error import DependencyNotInstalled
+import time
 
 
 class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
@@ -86,18 +87,27 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
     def __init__(self, render_mode: Optional[str] = None):
         self.gravity = 9.8
-        self.masscart = 1.0
-        self.masspole = 0.1
-        self.total_mass = self.masspole + self.masscart
-        self.length = 0.5  # actually half the pole's length
-        self.polemass_length = self.masspole * self.length
+        self.masscart = 3.0
+        self.masspole = 0.0
+        self.massball = 0.5  # weight on top of the pole
+        self.total_mass = self.masspole + self.masscart + self.massball
+        self.length = 0.4  # actually half the pole's length
+        self.polemass_length = (
+            self.masspole + self.massball
+        ) * self.length  # used for equations later
         self.force_mag = 10.0
         self.tau = 0.02  # seconds between state updates
         self.kinematics_integrator = "euler"
 
         # Angle at which to fail the episode
-        self.theta_threshold_radians = 12 * 2 * math.pi / 360
-        self.x_threshold = 2.4
+
+        degreesTilt = 30  # defaults to 12
+        self.theta_threshold_radians = (
+            degreesTilt * math.pi / 180
+        )  # how far of a lean to stop at
+        self.x_threshold = (
+            3  # how much space the robot can slide left and right. defaults to 2.4
+        )
 
         # Angle limit set to 2 * theta_threshold_radians so failing observation
         # is still within bounds.
@@ -136,13 +146,19 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
         # For the interested reader:
         # https://coneural.org/florian/papers/05_cart_pole.pdf
+        # These are the equations from the actual paper, (23-24)
         temp = (
-            force + self.polemass_length * theta_dot**2 * sintheta
+            -force - self.polemass_length * theta_dot**2 * sintheta
         ) / self.total_mass
-        thetaacc = (self.gravity * sintheta - costheta * temp) / (
+        thetaacc = (self.gravity * sintheta + costheta * temp) / (
             self.length * (4.0 / 3.0 - self.masspole * costheta**2 / self.total_mass)
         )
-        xacc = temp - self.polemass_length * thetaacc * costheta / self.total_mass
+        xacc = (
+            force
+            + self.polemass_length
+            * (theta_dot**2 * sintheta - theta_dot * costheta)
+            / self.total_mass
+        )
 
         if self.kinematics_integrator == "euler":
             x = x + self.tau * x_dot
@@ -310,13 +326,69 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
             self.isopen = False
 
 
-def controller():
-    pass
+def pid_controller():
+    # Create the CartPole environment
+    env = CartPoleEnv(render_mode="human")
+
+    # PID controller gains
+    Kp = 1.0  # Proportional gain
+    Ki = 0.05  # Integral gain
+    Kd = 0.02  # Derivative gain
+
+    # Initialize PID controller variables
+    integral = 0
+    prev_error = 0
+
+    # Simulation parameters
+    num_episodes = 100
+    max_steps = 5000
+
+    for episode in range(num_episodes):
+        state = env.reset()
+        total_reward = 0
+
+        for step in range(max_steps):
+            # Extract state information
+            if len(state) == 2:
+                array = state[0]
+                pole_angle = array[2]
+            else:
+                pole_angle = state[2]
+
+            # Calculate error (difference from the upright position)
+            error = pole_angle
+
+            # Update integral term
+            integral += error
+
+            # Calculate control action (PID controller)
+            control_action = Kp * error + Ki * integral + Kd * (error - prev_error)
+
+            # Apply the control action (push cart left or right)
+            if control_action > 0:
+                action = 1  # Push cart to the right
+            else:
+                action = 0  # Push cart to the left
+
+            # Step forward in the environment
+            state, reward, done, truncated, _ = env.step(action)
+
+            # Update previous error
+            prev_error = error
+
+            # Accumulate total reward
+            total_reward += reward
+
+            if done:
+                break
+
+        print(f"Episode {episode + 1}: Total Reward = {total_reward}")
+
+    # Close the environment when done
+    env.close()
 
 
-if __name__ == "__main__":
-    import time
-
+def main():
     env = CartPoleEnv(render_mode="human")
     env.reset()
     for _ in range(1000):
@@ -324,3 +396,7 @@ if __name__ == "__main__":
         env.render()
         time.sleep(0.1)
     env.close()
+
+
+if __name__ == "__main__":
+    pid_controller()
