@@ -12,24 +12,7 @@ from stable_baselines3.common.evaluation import evaluate_policy
 from datetime import datetime
 from controller import pid_controller
 from cartpole import CartPoleEnv
-
-
-def trainAgent():
-    # Step 1: Create the CartPole Environment
-    env = CartPoleEnv()
-
-    # Step 3: Initialize and Train the RL Agent
-    model = PPO("MlpPolicy", env, verbose=1)
-    model.learn(
-        total_timesteps=100000, progress_bar=True
-    )  # Adjust the number of timesteps as needed
-
-    # output to see how well we are doing
-    mean_reward = evaluateAgent(env, model)
-
-    # Step 4: Save the Trained Agent
-    model.save("ppo_cartpole")
-    env.close()
+import optuna
 
 
 def evaluateAgent(env, model):
@@ -38,18 +21,41 @@ def evaluateAgent(env, model):
     iterations = 10
     for _ in range(iterations):
         obs = env.reset()
+        if len(obs) == 2:
+            obs = obs[0]
         done = False
         while not done:
             # epsilon greedy action
-            if np.random.random() < epsilon:
+            if np.random.rand() < epsilon:
                 action = env.action_space.sample()
             else:
                 action, _ = model.predict(obs)
-        obs, reward, done, info = env.step(action)
-        total_reward += reward
+            obs, reward, done, truncated, info = env.step(action)
+            total_reward += reward
 
     average_reward = total_reward / iterations
     return average_reward
+
+
+def objective(trial):
+    learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-3)
+    gamma = trial.suggest_float("gamma", 0.9, 0.999)
+    n_steps = trial.suggest_int("n_steps", 32, 512)
+    batch_size = trial.suggest_int("batch_size", 64, 512)
+    env = CartPoleEnv()
+    model = PPO(
+        "MlpPolicy",
+        env,
+        verbose=0,
+        learning_rate=learning_rate,
+        gamma=gamma,
+        n_steps=n_steps,
+        batch_size=batch_size,
+    )
+    model.learn(total_timesteps=10000, progress_bar=True)
+    mean_reward = evaluateAgent(env, model)
+    env.close()
+    return mean_reward
 
 
 def loadTrainedAgent(episodes=10, test=False):
@@ -86,10 +92,33 @@ def loadTrainedAgent(episodes=10, test=False):
     return steps
 
 
+def getBestTrainingParams():
+    study = optuna.create_study(direction="maximize")
+    study.optimize(objective, n_trials=100)
+    best_params = study.best_params
+    best_learning_rate = best_params["learning_rate"]
+    best_n_steps = best_params["n_steps"]
+    best_batch_size = best_params["batch_size"]
+    print(f"Best params: {best_params}")
+
+
+def trainAgent(learning_rate=0.0008607377834906738, n_steps=46, batch_size=337):
+    env = CartPoleEnv()
+    model = PPO(
+        "MlpPolicy",
+        env,
+        verbose=0,
+        learning_rate=learning_rate,
+        n_steps=n_steps,
+        batch_size=batch_size,
+    )
+    model.learn(total_timesteps=100000, progress_bar=True)
+    model.save("ppo_cartpole")
+    env.close()
+
+
 if __name__ == "__main__":
-    # trainAgent()
+    # getBestTrainingParams()
+    trainAgent()
     trainedSteps = loadTrainedAgent(episodes=20, test=True)
-    # print(f"Trained agent took {trainedSteps} steps")
-    # kp, ki, kd = developControllerRatios()
-    # avgTime, avgSteps = pid_controller(17, 0, 19, episodes=5, human=True)
-    # print(f"PID controller took on average {avgSteps} steps")
+    print(f"Trained agent took {trainedSteps} steps")
