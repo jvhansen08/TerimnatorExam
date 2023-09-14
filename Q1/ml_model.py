@@ -58,22 +58,18 @@ def objective(trial):
     return mean_reward
 
 
-def loadTrainedAgent(episodes=10, test=False):
-    import gym
-    from stable_baselines3 import PPO
-
+def evaluateTrainedAgent(episodes=10, test=False):
     # Create the CartPole environment
     env = CartPoleEnv(render_mode="human")
 
     # Load the saved model
     model = PPO.load("ppo_cartpole")
-
+    stepsCounter = []
     # Define the number of episodes to run
     for episode in range(episodes):
         state = env.reset()
         if len(state) == 2:
             state = state[0]
-        total_reward = 0
         steps = 0
         while True:
             # Use the trained model to choose an action
@@ -82,35 +78,33 @@ def loadTrainedAgent(episodes=10, test=False):
             state, reward, done, truncated, _ = env.step(action)
             steps += 1
             # Accumulate total reward
-            total_reward += reward
             if done:
                 break
-            # if test and steps > 200:
-            #     break
+            if test and steps > 200:
+                break
+        stepsCounter.append(steps)
     # Close the environment when done
     env.close()
-    return steps
+    return np.mean(stepsCounter)
 
 
 def getBestTrainingParams():
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=20)
     best_params = study.best_params
     best_learning_rate = best_params["learning_rate"]
     best_n_steps = best_params["n_steps"]
     best_batch_size = best_params["batch_size"]
     print(f"Best params: {best_params}")
+    return best_learning_rate, best_n_steps, best_batch_size
 
 
-def trainAgent(learning_rate=0.0008607377834906738, n_steps=46, batch_size=337):
+def trainAgent(learning_rate=0.0008607377834906738, n_steps=46, batch_size=64):
     env = CartPoleEnv()
     model = PPO(
         "MlpPolicy",
         env,
         verbose=0,
-        learning_rate=learning_rate,
-        n_steps=n_steps,
-        batch_size=batch_size,
     )
     model.learn(total_timesteps=100000, progress_bar=True)
     model.save("ppo_cartpole")
@@ -118,7 +112,8 @@ def trainAgent(learning_rate=0.0008607377834906738, n_steps=46, batch_size=337):
 
 
 if __name__ == "__main__":
-    # getBestTrainingParams()
+    # learningRate, nSteps, batchSize = getBestTrainingParams()
+    # trainAgent(learningRate, nSteps, batchSize)
     trainAgent()
-    trainedSteps = loadTrainedAgent(episodes=20, test=True)
-    print(f"Trained agent took {trainedSteps} steps")
+    trainedStepsAverage = evaluateTrainedAgent(episodes=5)
+    print(f"Trained agent took on average {trainedStepsAverage} steps")

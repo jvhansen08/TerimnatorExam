@@ -96,7 +96,7 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         self.polemass_length = (
             self.masspole + self.massball
         ) * self.length  # used for equations later
-        self.force_mag = 1.5
+        self.force_mag = 1.1
         self.tau = 0.02  # seconds between state updates
         self.kinematics_integrator = "euler"
 
