@@ -4,3 +4,6 @@ PyOpenGL
 PyOpenGL-accelerate
 pyglet
 pygame
+stable_baselines3
+tensorflow
+shimmy

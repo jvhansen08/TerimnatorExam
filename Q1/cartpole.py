@@ -326,6 +326,63 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
             self.isopen = False
 
 
+def dqnController():
+    import gym
+    import gym.wrappers
+    from stable_baselines3 import PPO
+    from stable_baselines3.common.evaluation import evaluate_policy
+
+    # Step 1: Create the CartPole Environment
+    env = CartPoleEnv()
+
+    # Step 3: Initialize and Train the RL Agent
+    model = PPO("MlpPolicy", env, verbose=1)
+    model.learn(
+        total_timesteps=50000, log_interval=5000
+    )  # Adjust the number of timesteps as needed
+
+    # Step 4: Save the Trained Agent
+    model.save("ppo_cartpole")
+
+    env.close()
+
+
+def loadTrainedAgent():
+    import gym
+    from stable_baselines3 import PPO
+
+    # Create the CartPole environment
+    env = CartPoleEnv(render_mode="human")
+
+    # Load the saved model
+    model = PPO.load("ppo_cartpole")
+
+    # Define the number of episodes to run
+    num_episodes = 1
+
+    for episode in range(num_episodes):
+        state = env.reset()
+        if len(state) == 2:
+            state = state[0]
+        total_reward = 0
+        while True:
+            # Use the trained model to choose an action
+            action, _ = model.predict(state)
+
+            # Step forward in the environment
+            state, reward, done, truncated, _ = env.step(action)
+
+            # Accumulate total reward
+            total_reward += reward
+
+            if done:
+                print(f"Episode {episode + 1}: Total Reward = {total_reward}")
+                break
+
+    # Close the environment when done
+    env.close()
+
+
 def pid_controller():
     # Create the CartPole environment
     env = CartPoleEnv(render_mode="human")
@@ -399,4 +456,5 @@ def main():
 
 
 if __name__ == "__main__":
-    pid_controller()
+    dqnController()
+    loadTrainedAgent()
