@@ -368,7 +368,7 @@ def loadTrainedAgent(episodes=10):
             state = state[0]
         total_reward = 0
         steps = 0
-        while True:
+        while True and steps < 5000:
             # Use the trained model to choose an action
             action, _ = model.predict(state)
             # Step forward in the environment
@@ -383,7 +383,7 @@ def loadTrainedAgent(episodes=10):
     return steps
 
 
-def pid_controller(Kp, Ki, Kd, episodes, human=False):
+def pid_controller(Kp, Ki, Kd, episodes, human=False, demo=False):
     # Create the CartPole environment
     if human:
         env = CartPoleEnv(render_mode="human")
@@ -396,6 +396,8 @@ def pid_controller(Kp, Ki, Kd, episodes, human=False):
     rewards = []
     steps = []
     for episode in range(episodes):
+        if demo:
+            print("Episode: ", episode)
         state = env.reset()
         reward = 0
         done = False
@@ -460,20 +462,32 @@ def developControllerRatios():
     print(bestTime, bestTimeValues)
 
 
-def main():
+def noTraining():
     env = CartPoleEnv(render_mode="human")
     env.reset()
     for _ in range(1000):
-        env.step(env.action_space.sample())
+        state, newR, done, truncated, _ = env.step(env.action_space.sample())
+        if done:
+            break
         env.render()
         time.sleep(0.1)
     env.close()
 
 
+def demo():
+    print("\n---Demoing cart pole problem---\n")
+    noTraining()
+    print("\n---Demoing trained agent---\n")
+    loadTrainedAgent(episodes=1)
+    print("\n---Demoing PID controller---\n")
+    pid_controller(1, 0, 4, episodes=1, human=True, demo=True)
+
+
 if __name__ == "__main__":
+    demo()
     # trainAgent()
-    trainedSteps = loadTrainedAgent()
-    print(f"Trained agent took {trainedSteps} steps")
+    # trainedSteps = loadTrainedAgent()
+    # print(f"Trained agent took {trainedSteps} steps")
     # kp, ki, kd = developControllerRatios()
     # avgTime, avgSteps = pid_controller(1, 0, 4, episodes=5, human=True)
     # print(f"PID controller took on average {avgSteps} steps")
