@@ -475,12 +475,12 @@ def noTraining():
 
 
 def demo():
-    print("\n---Demoing cart pole problem---\n")
-    noTraining()
-    print("\n---Demoing trained agent---\n")
-    loadTrainedAgent(episodes=1)
+    # print("\n---Demoing cart pole problem---\n")
+    # noTraining()
+    # print("\n---Demoing trained agent---\n")
+    # loadTrainedAgent(episodes=3)
     print("\n---Demoing PID controller---\n")
-    pid_controller(1, 0, 4, episodes=1, human=True, demo=True)
+    pid_controller(1, 0, 4, episodes=10, human=True, demo=True)
 
 
 if __name__ == "__main__":
