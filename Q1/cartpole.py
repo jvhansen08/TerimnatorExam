@@ -326,6 +326,61 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
             self.isopen = False
 
 
+def dqnController():
+    import gym
+    from tensorflow import keras
+    from keras.models import Model
+    from keras.layers import Input, Dense, Activation, Reshape
+    from rl.memory import SequentialMemory
+
+    env = gym.make("CartPole-v1")
+    env.max_episode_steps = 500
+    num_actions = env.action_space.n
+    # Creating out simple NN model here
+    observation = Input(shape=(1,) + env.observation_space.shape)
+    x = Dense(16, activation="relu")(observation)
+    x = Dense(16, activation="relu")(x)
+    x = Dense(16, activation="relu")(x)
+    output = Dense(num_actions, activation="linear")(x)
+    output = Reshape((num_actions,))(output)
+    model = Model(inputs=observation, outputs=output)
+    memory = SequentialMemory(limit=50000, window_length=1)
+    # Defining the policy
+    from rl.policy import (
+        LinearAnnealedPolicy,
+    )  # Start curious and explore, later on stick to what works
+    from rl.policy import EpsGreedyQPolicy  # Go for best potential option first
+
+    polciy = LinearAnnealedPolicy(
+        EpsGreedyQPolicy(),
+        attr="eps",
+        value_max=1.0,
+        value_min=0.1,
+        value_test=0.05,
+        nb_steps=10000,
+    )
+    print(model.summary())
+    # Defining the agent
+    from rl.agents import DQNAgent
+    from rl.core import Processor
+    from keras.optimizers import Adam
+
+    DQN = DQNAgent(
+        model=model,
+        nb_actions=num_actions,
+        memory=memory,
+        nb_steps_warmup=500,
+        target_model_update=5e-2,
+        gamma=0.99,
+        bath_size=32,
+        policy=polciy,
+    )
+    DQN.compile(Adam(lr=1e-3), metrics=["mse"])
+    DQN.fit(env, nb_steps=50000, visualize=False, verbose=2, callback=[tb])
+    DQN.save_weights("dqn_weights.h5f", overwrite=True)
+    DQN.test(env, nb_episodes=5, visualize=True)
+
+
 def pid_controller():
     # Create the CartPole environment
     env = CartPoleEnv(render_mode="human")
@@ -399,4 +454,4 @@ def main():
 
 
 if __name__ == "__main__":
-    pid_controller()
+    dqnController()
