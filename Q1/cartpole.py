@@ -99,7 +99,7 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         self.polemass_length = (
             self.masspole + self.massball
         ) * self.length  # used for equations later
-        self.force_mag = 1.0
+        self.force_mag = 1.5
         self.tau = 0.02  # seconds between state updates
         self.kinematics_integrator = "euler"
 
@@ -340,9 +340,9 @@ def trainAgent():
     env = CartPoleEnv()
 
     # Step 3: Initialize and Train the RL Agent
-    model = PPO("MlpPolicy", env, verbose=1, batch_size=100)
+    model = PPO("MlpPolicy", env, verbose=1)
     model.learn(
-        total_timesteps=100000, log_interval=5000
+        total_timesteps=100000, progress_bar=True
     )  # Adjust the number of timesteps as needed
 
     # Step 4: Save the Trained Agent
@@ -350,7 +350,7 @@ def trainAgent():
     env.close()
 
 
-def loadTrainedAgent(episodes=10):
+def loadTrainedAgent(episodes=10, test=False):
     import gym
     from stable_baselines3 import PPO
 
@@ -361,7 +361,6 @@ def loadTrainedAgent(episodes=10):
     model = PPO.load("ppo_cartpole")
 
     # Define the number of episodes to run
-
     for episode in range(episodes):
         state = env.reset()
         if len(state) == 2:
@@ -378,12 +377,14 @@ def loadTrainedAgent(episodes=10):
             total_reward += reward
             if done:
                 break
+            # if test and steps > 200:
+            #     break
     # Close the environment when done
     env.close()
     return steps
 
 
-def pid_controller(Kp, Ki, Kd, episodes, human=False):
+def pid_controller(Kp, Ki, Kd, episodes, human=False, demo=False):
     # Create the CartPole environment
     if human:
         env = CartPoleEnv(render_mode="human")
@@ -396,6 +397,8 @@ def pid_controller(Kp, Ki, Kd, episodes, human=False):
     rewards = []
     steps = []
     for episode in range(episodes):
+        if demo:
+            print("Episode: ", episode)
         state = env.reset()
         reward = 0
         done = False
@@ -437,8 +440,8 @@ def developControllerRatios():
     bestSteps = 0
     bestStepsValues = [0] * 3
     averageTimes = []
-    iterations = 10
-    episodes = 50
+    iterations = 20
+    episodes = 10
     start = datetime.now()
     for kp in range(iterations):  # Proportional gain
         for ki in range(iterations):  # Integral gain
@@ -460,20 +463,32 @@ def developControllerRatios():
     print(bestTime, bestTimeValues)
 
 
-def main():
+def noTraining():
     env = CartPoleEnv(render_mode="human")
     env.reset()
     for _ in range(1000):
-        env.step(env.action_space.sample())
+        state, newR, done, truncated, _ = env.step(env.action_space.sample())
+        if done:
+            break
         env.render()
         time.sleep(0.1)
     env.close()
 
 
+def demo():
+    # print("\n---Demoing cart pole problem---\n")
+    # noTraining()
+    # print("\n---Demoing trained agent---\n")
+    # loadTrainedAgent(episodes=3)
+    print("\n---Demoing PID controller---\n")
+    pid_controller(1, 0, 4, episodes=10, human=True, demo=True)
+
+
 if __name__ == "__main__":
+    # demo()
     # trainAgent()
-    trainedSteps = loadTrainedAgent()
-    print(f"Trained agent took {trainedSteps} steps")
+    trainedSteps = loadTrainedAgent(episodes=20, test=True)
+    # print(f"Trained agent took {trainedSteps} steps")
     # kp, ki, kd = developControllerRatios()
-    # avgTime, avgSteps = pid_controller(1, 0, 4, episodes=5, human=True)
+    # avgTime, avgSteps = pid_controller(17, 0, 19, episodes=5, human=True)
     # print(f"PID controller took on average {avgSteps} steps")
