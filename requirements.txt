@@ -9,3 +9,4 @@ tensorflow
 shimmy
 tqdm
 rich
+optuna
