@@ -4,8 +4,6 @@ PyOpenGL
 PyOpenGL-accelerate
 pyglet
 pygame
-keras==2.4.0
-rl
+stable_baselines3
 tensorflow
-tensorflow-cpu
-keras-rl
+shimmy
