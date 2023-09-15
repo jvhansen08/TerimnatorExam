@@ -70,7 +70,7 @@ def trainAgent():
         env,
         verbose=1,
     )
-    model = model.learn(total_timesteps=50000, progress_bar=True)
+    model = model.learn(total_timesteps=500000, progress_bar=True)
     model.save("ppo_cartpole")
     env.close()
 
@@ -103,11 +103,13 @@ def evaluateTrainedAgent(episodes=10, maxSteps=None):
     # Close the environment when done
     env.close()
     failures = countFailures(stepsCounter, maxSteps)
-    passRate = round(1 - (failures / episodes), 3)
+    passRate = round(
+        1 - (failures / episodes), 3
+    )  # Note this also takes into account where the bot goes off the frame. At about 500 steps if still up it is stable, but it will go off the screen to stay balanced
     print(
         f"Worst: {np.min(stepsCounter)} Best: {np.max(stepsCounter)} Average:{np.mean(stepsCounter)}"
     )
-    print(f"Pass Rate: {passRate}")
+    # print(f"Failures {failures} Pass Rate: {passRate}")
     return passRate
 
 
@@ -130,8 +132,6 @@ def displayAgent():
         # Accumulate total reward
         if done:
             break
-        if maxSteps and steps > maxSteps:
-            break
     stepsCounter.append(steps)
     # Close the environment when done
     env.close()
@@ -150,16 +150,7 @@ if __name__ == "__main__":
     # learningRate, nSteps, batchSize = getBestTrainingParams()
     # trainAgent(learningRate, nSteps, batchSize)
     # trainAgent()
-    maxSteps = 500
+    maxSteps = 1000
     episodes = 50
-    bestSeed = 0
-    bestSeedPercentage = 0.0
-    # for seed in range(80, 90):
-    #     SEED = seed
-    #     passRate = evaluateTrainedAgent(episodes=episodes, maxSteps=maxSteps)
-    #     if passRate > bestSeedPercentage:
-    #         bestSeedPercentage = passRate
-    #         bestSeed = seed
-    # print("the best seed is ", bestSeed)
-    # print("the best seed percentage is ", bestSeedPercentage)
+    evaluateTrainedAgent(episodes=episodes, maxSteps=maxSteps)
     displayAgent()

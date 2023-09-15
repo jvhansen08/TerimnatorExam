@@ -15,6 +15,7 @@ import gym.wrappers
 
 SEED = 85
 
+
 class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
     """
     ### Description
