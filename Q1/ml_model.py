@@ -1,19 +1,9 @@
-import math
-from typing import Optional, Union
 import numpy as np
-import gym
-from gym import logger, spaces
-from gym.envs.classic_control import utils
-from gym.error import DependencyNotInstalled
-import time
-import gym.wrappers
 from stable_baselines3 import PPO
 from stable_baselines3.common.evaluation import evaluate_policy
-from datetime import datetime
-from controller import evaluatePIDController
+from stable_baselines3.common.env_util import make_vec_env
 from cartpole import CartPoleEnv
 import optuna
-from stable_baselines3.common.env_util import make_vec_env
 
 
 def evaluateAgent(env, model):
@@ -71,13 +61,17 @@ def getBestTrainingParams():
 
 
 def trainAgent():
+    # learning_rate=0.0005754,
+    # gamma=0.912318,
+    # n_steps=478,
+    # batch_size=478 * 4,
     vec_env = make_vec_env(CartPoleEnv, n_envs=4)
     model = PPO(
         "MlpPolicy",
         vec_env,
         verbose=1,
     )
-    model.learn(total_timesteps=100000, progress_bar=True)
+    model = model.learn(total_timesteps=50000, progress_bar=True)
     model.save("ppo_cartpole")
     vec_env.close()
 
@@ -91,8 +85,8 @@ def evaluateTrainedAgent(episodes=10, maxSteps=None):
     # Define the number of episodes to run
     for episode in range(episodes):
         state = vec_env.reset()
-        if len(state) == 2:
-            state = state[0]
+        # if len(state) == 2:
+        #     state = state[0]
         steps = 0
         while True:
             # Use the trained model to choose an action
@@ -100,7 +94,6 @@ def evaluateTrainedAgent(episodes=10, maxSteps=None):
             # Step forward in the environment
             state, rewards, dones, info = vec_env.step(action)
             steps += 1
-            vec_env.render("human")
             # Accumulate total reward
             if dones.all():
                 break
@@ -109,7 +102,11 @@ def evaluateTrainedAgent(episodes=10, maxSteps=None):
         stepsCounter.append(steps)
     # Close the environment when done
     vec_env.close()
-    return stepsCounter
+    failures = countFailures(stepsCounter, maxSteps)
+    print(f"Trained agent took on average {np.mean(stepsCounter)} steps")
+    print(f"Of {episodes} episodes, {failures} failed. ({failures / episodes}%)")
+
+    return round(failures / episodes, 2)
 
 
 def displayAgent():
@@ -118,24 +115,22 @@ def displayAgent():
     env = CartPoleEnv(render_mode="human")
     model = PPO.load("ppo_cartpole")
     stepsCounter = []
-    # Define the number of episodes to run
-    for episode in range(episodes):
-        state = env.reset()
-        if len(state) == 2:
-            state = state[0]
-        steps = 0
-        while True:
-            # Use the trained model to choose an action
-            action, _ = model.predict(state)
-            # Step forward in the environment
-            state, reward, done, info, _ = env.step(action)
-            steps += 1
-            # Accumulate total reward
-            if done:
-                break
-            if maxSteps and steps > maxSteps:
-                break
-        stepsCounter.append(steps)
+    state = env.reset()
+    if len(state) == 2:
+        state = state[0]
+    steps = 0
+    while True:
+        # Use the trained model to choose an action
+        action, _ = model.predict(state)
+        # Step forward in the environment
+        state, reward, done, info, _ = env.step(action)
+        steps += 1
+        # Accumulate total reward
+        if done:
+            break
+        if maxSteps and steps > maxSteps:
+            break
+    stepsCounter.append(steps)
     # Close the environment when done
     env.close()
     return stepsCounter
@@ -153,11 +148,8 @@ if __name__ == "__main__":
     # learningRate, nSteps, batchSize = getBestTrainingParams()
     # trainAgent(learningRate, nSteps, batchSize)
     # trainAgent()
-    maxSteps = 300
+    maxSteps = 500
     episodes = 50
-    # trainedStepsAverages = evaluateTrainedAgent(episodes=episodes, maxSteps=maxSteps)
-    # print(f"Trained agent took on average {np.mean(trainedStepsAverages)} steps")
-    # print(
-    #     f"Of {episodes} episodes, {countFailures(trainedStepsAverages, maxSteps)} failed"
-    # )
-    displayAgent()
+    evaluateTrainedAgent(episodes=50, maxSteps=maxSteps)
+    for i in range(5):
+        displayAgent()
