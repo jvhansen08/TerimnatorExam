@@ -113,7 +113,7 @@ def displayAgent():
     # Create the CartPole environment
     # Load the saved model
     env = CartPoleEnv(render_mode="human")
-    model = PPO.load("ppo_cartpole")
+    model = PPO.load("ppo_cartpole_85")
     stepsCounter = []
     state = env.reset(seed=SEED)
     if len(state) == 2:
