@@ -3,7 +3,7 @@ import numpy as np
 from datetime import datetime
 
 
-def pid_controller(Kp, Ki, Kd, episodes, human=False, demo=False):
+def evaluatePIDController(Kp, Ki, Kd, episodes, human=False, test=False):
     # Create the CartPole environment
     if human:
         env = CartPoleEnv(render_mode="human")
@@ -13,16 +13,13 @@ def pid_controller(Kp, Ki, Kd, episodes, human=False, demo=False):
     integral = 0
     prev_error = 0
     # Simulation parameters
-    rewards = []
-    steps = []
+    steps = np.array([])
     for episode in range(episodes):
-        if demo:
-            print("Episode: ", episode)
         state = env.reset()
         reward = 0
         done = False
         stepCounter = 0
-        while not done and stepCounter < 5000:
+        while not done:
             # Extract state information
             if len(state) == 2:
                 array = state[0]
@@ -47,10 +44,11 @@ def pid_controller(Kp, Ki, Kd, episodes, human=False, demo=False):
             prev_error = error
             # Accumulate total reward
             reward += newR
-        rewards.append(reward)
-        steps.append(stepCounter)
+            if test and stepCounter > 250:
+                done = True
+        steps = np.append(steps, stepCounter)
     env.close()
-    return np.mean(rewards), np.mean(steps)
+    return np.median(steps)
 
 
 def developControllerRatios():
@@ -58,25 +56,31 @@ def developControllerRatios():
     bestTimeValues = [0] * 3
     bestSteps = 0
     bestStepsValues = [0] * 3
-    averageTimes = []
-    iterations = 20
-    episodes = 10
+    iterations = 50
+    episodes = 20
     start = datetime.now()
+    ki = 0
     for kp in range(iterations):  # Proportional gain
-        for ki in range(iterations):  # Integral gain
-            for kd in range(iterations):  # Derivative gain
-                avgTime, avgSteps = pid_controller(kp, ki, kd, episodes=episodes)
-                averageTimes.append(avgTime)
-                if avgTime > bestTime:
-                    bestTime = avgTime
-                    bestTimeValues = [kp, ki, kd]
-                    print(f"New best time: {bestTime} with values {bestTimeValues}")
-                if avgSteps > bestSteps:
-                    bestSteps = avgSteps
-                    bestStepsValues = [kp, ki, kd]
-                    print(f"New best steps: {bestSteps} with values {bestStepsValues}")
+        if kp % 10 == 0:
+            print(f"kp: {kp}")
+        for kd in range(iterations):  # Derivative gain
+            avgSteps = evaluatePIDController(kp, ki, kd, episodes=episodes)
+            if avgSteps > bestSteps:
+                bestSteps = avgSteps
+                bestStepsValues = [kp, ki, kd]
+                print(f"New best steps: {bestSteps} with values {bestStepsValues}")
     finish = datetime.now()
     print(
         f"Time taken: {finish - start} with {episodes} episodes and {iterations} iterations"
     )
     print(bestTime, bestTimeValues)
+    return bestTimeValues
+
+
+if __name__ == "__main__":
+    # values = developControllerRatios()
+    values = [17, 0, 33]  # best values out of 100 kps x 100 kds
+    controllerStepsAverage = evaluatePIDController(
+        values[0], values[1], values[2], human=True, episodes=10, test=True
+    )
+    print(f"Trained agent took on average {controllerStepsAverage} steps")

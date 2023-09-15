@@ -10,7 +10,7 @@ import gym.wrappers
 from stable_baselines3 import PPO
 from stable_baselines3.common.evaluation import evaluate_policy
 from datetime import datetime
-from controller import pid_controller
+from controller import evaluatePIDController
 from cartpole import CartPoleEnv
 import optuna
 
@@ -80,7 +80,7 @@ def evaluateTrainedAgent(episodes=10, test=False):
             # Accumulate total reward
             if done:
                 break
-            if test and steps > 200:
+            if test and steps > 250:
                 break
         stepsCounter.append(steps)
     # Close the environment when done
@@ -114,6 +114,6 @@ def trainAgent(learning_rate=0.0008607377834906738, n_steps=46, batch_size=64):
 if __name__ == "__main__":
     # learningRate, nSteps, batchSize = getBestTrainingParams()
     # trainAgent(learningRate, nSteps, batchSize)
-    trainAgent()
-    trainedStepsAverage = evaluateTrainedAgent(episodes=5)
+    # trainAgent()
+    trainedStepsAverage = evaluateTrainedAgent(episodes=5, test=True)
     print(f"Trained agent took on average {trainedStepsAverage} steps")
