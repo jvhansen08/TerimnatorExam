@@ -1,9 +1,8 @@
 import numpy as np
 from stable_baselines3 import PPO
-from stable_baselines3.common.evaluation import evaluate_policy
-from stable_baselines3.common.env_util import make_vec_env
 from cartpole import CartPoleEnv
 import optuna
+from cartpole import SEED
 
 
 def evaluateAgent(env, model):
@@ -65,48 +64,51 @@ def trainAgent():
     # gamma=0.912318,
     # n_steps=478,
     # batch_size=478 * 4,
-    vec_env = make_vec_env(CartPoleEnv, n_envs=4)
+    env = CartPoleEnv()
     model = PPO(
         "MlpPolicy",
-        vec_env,
+        env,
         verbose=1,
     )
     model = model.learn(total_timesteps=50000, progress_bar=True)
     model.save("ppo_cartpole")
-    vec_env.close()
+    env.close()
 
 
 def evaluateTrainedAgent(episodes=10, maxSteps=None):
+    """Evaluate the trained agent and return the pass rate"""
     # Create the CartPole environment
     # Load the saved model
-    vec_env = make_vec_env(CartPoleEnv, n_envs=1)
+    env = CartPoleEnv()
     model = PPO.load("ppo_cartpole")
     stepsCounter = []
     # Define the number of episodes to run
     for episode in range(episodes):
-        state = vec_env.reset()
-        # if len(state) == 2:
-        #     state = state[0]
+        state = env.reset(seed=SEED)
+        if len(state) == 2:
+            state = state[0]
         steps = 0
         while True:
             # Use the trained model to choose an action
             action, _ = model.predict(state)
             # Step forward in the environment
-            state, rewards, dones, info = vec_env.step(action)
+            state, rewards, done, info, _ = env.step(action)
             steps += 1
             # Accumulate total reward
-            if dones.all():
+            if done:
                 break
             if maxSteps and steps > maxSteps:
                 break
         stepsCounter.append(steps)
     # Close the environment when done
-    vec_env.close()
+    env.close()
     failures = countFailures(stepsCounter, maxSteps)
-    print(f"Trained agent took on average {np.mean(stepsCounter)} steps")
-    print(f"Of {episodes} episodes, {failures} failed. ({failures / episodes}%)")
-
-    return round(failures / episodes, 2)
+    passRate = round(1 - (failures / episodes), 3)
+    print(
+        f"Worst: {np.min(stepsCounter)} Best: {np.max(stepsCounter)} Average:{np.mean(stepsCounter)}"
+    )
+    print(f"Pass Rate: {passRate}")
+    return passRate
 
 
 def displayAgent():
@@ -115,7 +117,7 @@ def displayAgent():
     env = CartPoleEnv(render_mode="human")
     model = PPO.load("ppo_cartpole")
     stepsCounter = []
-    state = env.reset()
+    state = env.reset(seed=SEED)
     if len(state) == 2:
         state = state[0]
     steps = 0
@@ -150,6 +152,14 @@ if __name__ == "__main__":
     # trainAgent()
     maxSteps = 500
     episodes = 50
-    evaluateTrainedAgent(episodes=50, maxSteps=maxSteps)
-    for i in range(5):
-        displayAgent()
+    bestSeed = 0
+    bestSeedPercentage = 0.0
+    # for seed in range(80, 90):
+    #     SEED = seed
+    #     passRate = evaluateTrainedAgent(episodes=episodes, maxSteps=maxSteps)
+    #     if passRate > bestSeedPercentage:
+    #         bestSeedPercentage = passRate
+    #         bestSeed = seed
+    # print("the best seed is ", bestSeed)
+    # print("the best seed percentage is ", bestSeedPercentage)
+    displayAgent()

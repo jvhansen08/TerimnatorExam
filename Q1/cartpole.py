@@ -13,6 +13,7 @@ from gym.error import DependencyNotInstalled
 import time
 import gym.wrappers
 
+SEED = 85
 
 class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
     """
