@@ -144,7 +144,7 @@ def countFailures(steps, maxSteps):
 
 if __name__ == "__main__":
     maxSteps = 1000
-    episodes = 50
+    episodes = 100
     # trainAgent()
-    # evaluateTrainedAgent(episodes=episodes, maxSteps=maxSteps)
-    displayAgent()
+    evaluateTrainedAgent(episodes=episodes, maxSteps=maxSteps)
+    # displayAgent()
