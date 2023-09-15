@@ -13,6 +13,8 @@ from gym.error import DependencyNotInstalled
 import time
 import gym.wrappers
 
+SEED = 85
+
 
 class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
     """
@@ -96,7 +98,7 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         self.polemass_length = (
             self.masspole + self.massball
         ) * self.length  # used for equations later
-        self.force_mag = 1.1
+        self.force_mag = 1
         self.tau = 0.02  # seconds between state updates
         self.kinematics_integrator = "euler"
 
@@ -127,7 +129,7 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
         self.render_mode = render_mode
 
-        self.screen_width = 600
+        self.screen_width = 800  # default 600
         self.screen_height = 400
         self.screen = None
         self.clock = None
