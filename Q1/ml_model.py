@@ -13,6 +13,7 @@ from datetime import datetime
 from controller import evaluatePIDController
 from cartpole import CartPoleEnv
 import optuna
+from stable_baselines3.common.env_util import make_vec_env
 
 
 def evaluateAgent(env, model):
@@ -58,11 +59,63 @@ def objective(trial):
     return mean_reward
 
 
-def evaluateTrainedAgent(episodes=10, test=False):
-    # Create the CartPole environment
-    env = CartPoleEnv(render_mode="human")
+def getBestTrainingParams():
+    study = optuna.create_study(direction="maximize")
+    study.optimize(objective, n_trials=20)
+    best_params = study.best_params
+    best_learning_rate = best_params["learning_rate"]
+    best_n_steps = best_params["n_steps"]
+    best_batch_size = best_params["batch_size"]
+    print(f"Best params: {best_params}")
+    return best_learning_rate, best_n_steps, best_batch_size
 
+
+def trainAgent():
+    vec_env = make_vec_env(CartPoleEnv, n_envs=4)
+    model = PPO(
+        "MlpPolicy",
+        vec_env,
+        verbose=1,
+    )
+    model.learn(total_timesteps=100000, progress_bar=True)
+    model.save("ppo_cartpole")
+    vec_env.close()
+
+
+def evaluateTrainedAgent(episodes=10, maxSteps=None):
+    # Create the CartPole environment
     # Load the saved model
+    vec_env = make_vec_env(CartPoleEnv, n_envs=1)
+    model = PPO.load("ppo_cartpole")
+    stepsCounter = []
+    # Define the number of episodes to run
+    for episode in range(episodes):
+        state = vec_env.reset()
+        if len(state) == 2:
+            state = state[0]
+        steps = 0
+        while True:
+            # Use the trained model to choose an action
+            action, _ = model.predict(state)
+            # Step forward in the environment
+            state, rewards, dones, info = vec_env.step(action)
+            steps += 1
+            vec_env.render("human")
+            # Accumulate total reward
+            if dones.all():
+                break
+            if maxSteps and steps > maxSteps:
+                break
+        stepsCounter.append(steps)
+    # Close the environment when done
+    vec_env.close()
+    return stepsCounter
+
+
+def displayAgent():
+    # Create the CartPole environment
+    # Load the saved model
+    env = CartPoleEnv(render_mode="human")
     model = PPO.load("ppo_cartpole")
     stepsCounter = []
     # Define the number of episodes to run
@@ -75,45 +128,36 @@ def evaluateTrainedAgent(episodes=10, test=False):
             # Use the trained model to choose an action
             action, _ = model.predict(state)
             # Step forward in the environment
-            state, reward, done, truncated, _ = env.step(action)
+            state, reward, done, info, _ = env.step(action)
             steps += 1
             # Accumulate total reward
             if done:
                 break
-            if test and steps > 250:
+            if maxSteps and steps > maxSteps:
                 break
         stepsCounter.append(steps)
     # Close the environment when done
     env.close()
-    return np.mean(stepsCounter)
+    return stepsCounter
 
 
-def getBestTrainingParams():
-    study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=20)
-    best_params = study.best_params
-    best_learning_rate = best_params["learning_rate"]
-    best_n_steps = best_params["n_steps"]
-    best_batch_size = best_params["batch_size"]
-    print(f"Best params: {best_params}")
-    return best_learning_rate, best_n_steps, best_batch_size
-
-
-def trainAgent(learning_rate=0.0008607377834906738, n_steps=46, batch_size=64):
-    env = CartPoleEnv()
-    model = PPO(
-        "MlpPolicy",
-        env,
-        verbose=0,
-    )
-    model.learn(total_timesteps=100000, progress_bar=True)
-    model.save("ppo_cartpole")
-    env.close()
+def countFailures(steps, maxSteps):
+    counter = 0
+    for i in steps:
+        if i < maxSteps:
+            counter += 1
+    return counter
 
 
 if __name__ == "__main__":
     # learningRate, nSteps, batchSize = getBestTrainingParams()
     # trainAgent(learningRate, nSteps, batchSize)
     # trainAgent()
-    trainedStepsAverage = evaluateTrainedAgent(episodes=5, test=True)
-    print(f"Trained agent took on average {trainedStepsAverage} steps")
+    maxSteps = 300
+    episodes = 50
+    # trainedStepsAverages = evaluateTrainedAgent(episodes=episodes, maxSteps=maxSteps)
+    # print(f"Trained agent took on average {np.mean(trainedStepsAverages)} steps")
+    # print(
+    #     f"Of {episodes} episodes, {countFailures(trainedStepsAverages, maxSteps)} failed"
+    # )
+    displayAgent()

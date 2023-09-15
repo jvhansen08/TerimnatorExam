@@ -3,7 +3,7 @@ import numpy as np
 from datetime import datetime
 
 
-def evaluatePIDController(Kp, Ki, Kd, episodes, human=False, test=False):
+def evaluatePIDController(Kp, Ki, Kd, episodes, human=False, maxSteps=None):
     # Create the CartPole environment
     if human:
         env = CartPoleEnv(render_mode="human")
@@ -44,7 +44,7 @@ def evaluatePIDController(Kp, Ki, Kd, episodes, human=False, test=False):
             prev_error = error
             # Accumulate total reward
             reward += newR
-            if test and stepCounter > 250:
+            if maxSteps and stepCounter > maxSteps:
                 done = True
         steps = np.append(steps, stepCounter)
     env.close()
@@ -81,6 +81,6 @@ if __name__ == "__main__":
     # values = developControllerRatios()
     values = [17, 0, 33]  # best values out of 100 kps x 100 kds
     controllerStepsAverage = evaluatePIDController(
-        values[0], values[1], values[2], human=True, episodes=10, test=True
+        values[0], values[1], values[2], human=True, episodes=10, maxSteps=300
     )
-    print(f"Trained agent took on average {controllerStepsAverage} steps")
+    print(f"Controller took on average {controllerStepsAverage} steps")
