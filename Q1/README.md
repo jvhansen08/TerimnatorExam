@@ -2,11 +2,13 @@
 
 Be sure to use the installation [instructions](../README.md) found in the root of this repository.
 
-To run the simulation, execute this command:
+To run the simulation, execute this command from the root of the repository:
 
 ```bash
-python3 cartpole.py
+python3 Q1/demo.py
 ```
+
+This will first play a demo to see what it is like without any guidance, then go through the PID controller and the ML model response.
 
 # Citations:
 

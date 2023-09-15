@@ -129,7 +129,7 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
 
         self.render_mode = render_mode
 
-        self.screen_width = 600
+        self.screen_width = 800  # default 600
         self.screen_height = 400
         self.screen = None
         self.clock = None

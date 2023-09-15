@@ -65,13 +65,9 @@ def trainAgent():
     # n_steps=478,
     # batch_size=478 * 4,
     env = CartPoleEnv()
-    model = PPO(
-        "MlpPolicy",
-        env,
-        verbose=1,
-    )
-    model = model.learn(total_timesteps=500000, progress_bar=True)
-    model.save("ppo_cartpole")
+    model = PPO("MlpPolicy", env, verbose=1, seed=85)
+    model = model.learn(total_timesteps=100000, progress_bar=True)
+    model.save("ppo_cartpole_85")
     env.close()
 
 
@@ -80,7 +76,7 @@ def evaluateTrainedAgent(episodes=10, maxSteps=None):
     # Create the CartPole environment
     # Load the saved model
     env = CartPoleEnv()
-    model = PPO.load("ppo_cartpole")
+    model = PPO.load("ppo_cartpole_85")
     stepsCounter = []
     # Define the number of episodes to run
     for episode in range(episodes):
@@ -147,10 +143,8 @@ def countFailures(steps, maxSteps):
 
 
 if __name__ == "__main__":
-    # learningRate, nSteps, batchSize = getBestTrainingParams()
-    # trainAgent(learningRate, nSteps, batchSize)
-    # trainAgent()
     maxSteps = 1000
     episodes = 50
-    evaluateTrainedAgent(episodes=episodes, maxSteps=maxSteps)
+    # trainAgent()
+    # evaluateTrainedAgent(episodes=episodes, maxSteps=maxSteps)
     displayAgent()

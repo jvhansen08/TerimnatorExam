@@ -4,7 +4,7 @@ from datetime import datetime
 import random
 
 
-def evaluatePIDController(Kp, Ki, Kd, episodes, human=False, maxSteps=None):
+def evaluatePIDController(Kp=17, Ki=0, Kd=33, episodes=1, human=False, maxSteps=None):
     # Create the CartPole environment
     if human:
         env = CartPoleEnv(render_mode="human")
