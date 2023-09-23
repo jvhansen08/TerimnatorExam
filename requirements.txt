@@ -10,3 +10,7 @@ shimmy
 tqdm
 rich
 optuna
+opencv-python
+fer
+matplotlib
+psutil

@@ -19,13 +19,13 @@ source .venv/bin/activate
 Windows
 
 ```bash
-.venv\Scripts\activate.bat
+.venv\Scripts\activate
 ```
 
 Install the requirements
 
 ```bash
-pip install -r requirements.txt
+pip3 install --no-cache-dir -r requirements.txt
 ```
 
 Deactivate the virtual environment
