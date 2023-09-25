@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     # Initialize the video capture
     if choice == '1':
-        video_capture = cv2.VideoCapture(0)  # Webcam
+        video_capture = cv2.VideoCapture(0, cv2.CAP_DSHOW)  # Webcam
     else:
         video_capture = cv2.VideoCapture('./emotionRecording.mp4')  # Video file
 
