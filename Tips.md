@@ -36,6 +36,12 @@ Question 8:
 - Deploy YOLO on the raspberry Pi
 - D shouldn’t be too much of an additional burden
 
+## For Ros
+
+- pynput for taking in commands
+- GParted for resizing the SD card
+-
+
 # Stamp
 
 ```
