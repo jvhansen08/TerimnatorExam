@@ -22,7 +22,7 @@ Windows
 .venv\Scripts\activate
 ```
 
-Install the requirements
+Install the requirementsls 
 
 ```bash
 pip3 install --no-cache-dir -r requirements.txt
