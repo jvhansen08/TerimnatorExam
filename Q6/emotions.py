@@ -2,9 +2,11 @@ import cv2
 import numpy as np
 from fer import FER
 import matplotlib
-matplotlib.use('TkAgg')  # Use the TkAgg backend
-
 import matplotlib.pyplot as plt
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+
+matplotlib.use('TkAgg')  # Use the TkAgg backend
 
 if __name__ == '__main__':
 
@@ -19,6 +21,7 @@ if __name__ == '__main__':
     emotions_video1 = np.array([])
     emotions_video2 = np.array([])
 
+    print("Analyzing videos, please wait...")
     while True:
         # Read frames from the videos
         ret1, frame1 = video1.read()
@@ -34,9 +37,9 @@ if __name__ == '__main__':
         emotions_video1 = np.append(emotions_video1, emotions1)
         emotions_video2 = np.append(emotions_video2, emotions2)
 
+    print("Done analyzing videos!")
     # Create a time axis for plotting
     time_axis = np.arange(len(emotions_video1))
-
 
     # Plot emotions over time for video 1
     plt.figure(figsize=(10, 10))

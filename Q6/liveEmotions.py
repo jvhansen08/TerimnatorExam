@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
-import psutil  # For CPU usage measurement
-import time  # For FPS calculation
+import psutil
+import time
 import matplotlib
 import cv2
 import numpy as np
 from fer import FER
-# Force Matplotlib to use a different backend (e.g., TkAgg)
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 matplotlib.use('TkAgg')
 
 if __name__ == '__main__':
@@ -37,6 +38,10 @@ if __name__ == '__main__':
 
     # Initialize empty lists to store emotion predictions
     emotions = []
+
+    while True:
+        if video_capture.isOpened():
+            break
 
     while True:
         # Read a frame from the video source
