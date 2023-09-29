@@ -16,6 +16,7 @@ Question 4:
 - B solves chicken and egg problem. Tricker than question 3 algorithms to implement. Show the map and discuss it
 - C Lookup the cost of all the sensors.
 - D (Grad students) Orb slam algorithm outside. (Will discuss ROS in class Robot Operating System). Talk about specifically which landmarks you could see and what the distances were.
+- Potentially use a QR code or marking on the ground for the robot to localize itself. (Sep 25 2023)
 
 Question 5
 
