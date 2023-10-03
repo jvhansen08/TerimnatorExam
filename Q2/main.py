@@ -44,7 +44,9 @@ def ackermanCircle():
     moveCircle(x_coordinates, y_coordinates, theta_history)
     # TODO: Create a function to up to the top. Calculate radius of inner circle to get to the edge, then move over there before starting
     plt.plot(x_coordinates, y_coordinates)
-    plt.show()
+    plt.savefig("ackerman.png")
+    plt.close()
+    # plt.show()
 
 def getToEdge(x_coordinates, y_coordinates, theta_history):
     innerRadius = 9
@@ -71,11 +73,30 @@ def moveRobot(x_coordinates, y_coordinates, theta_history, number_seconds, alpha
             y_coordinates.append(y_next)
             theta_history.append(theta_next)
         
-
 def skidSteer():
     # Skid steer setup will just be straight line, get to edge, then rotate 90 degrees
     # TODO: Implement the same circle mechanism, but using skid steer insted of the ackerman model
-    pass
+    x_coordinates = [0]
+    y_coordinates = [0]
+    theta_history = [0]
+    # Move robot to get to the edge of the circle
+    skidSteerGetToEdge(x_coordinates, y_coordinates, theta_history)
+    # Now rotate 90 degrees
+    theta_history[-1] += np.pi/2
+    x_coordinates.append(x_coordinates[-1])
+    y_coordinates.append(y_coordinates[-1])
+    # Complete the circle
+    moveCircle(x_coordinates, y_coordinates, theta_history)
+    plt.plot(x_coordinates, y_coordinates)
+    plt.savefig("skidSteer.png")
+    # plt.show()
+
+    
+
+def skidSteerGetToEdge(x_coordinates, y_coordinates, theta_history):
+    # Skid steer can simply move in a line up to the edge of the circle, then rotate 90 degrees
+    moveRobot(x_coordinates, y_coordinates, theta_history, 2, 0)
+
 
 def positionalError():
     pass
@@ -88,7 +109,8 @@ def positionalError():
 
 
 def main():
-    ackermanCircle()
+    # ackermanCircle()
+    skidSteer()
 
 
 if __name__ == "__main__":
