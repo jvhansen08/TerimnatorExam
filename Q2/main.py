@@ -45,13 +45,19 @@ def skidSteer():
     pass
 
 def positionalError():
+    pass
     #TODO: Use Euler method to calculate the positional error of the robot
     # TODO: Graph the rrors for 3 time steps 1, 0.1, and 0.01
 
 def plot(x_coordinates, y_coordinates, angular_velocities):
+
+    # Plot the circle
+    circle = plt.Circle((0, 0), 18, color="black", fill=False)
+
+
     # Plot the path
     plt.figure(figsize=(10, 6))
-    plt.plot(x_coordinates, y_coordinates, label="Path")
+    plt.plot(x_coordinates, y_coordinates, label="Path", color="blue")
     plt.xlabel("X (meters)")
     plt.ylabel("Y (meters)")
     plt.title("Robot Path along the Edge of a Circle")
