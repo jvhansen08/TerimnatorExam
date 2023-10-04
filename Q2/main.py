@@ -1,71 +1,54 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import time
+
 FEET_TO_METERS = 0.3048
-VEHICLE_LENGTH = 35 / FEET_TO_METERS # length of the vehicle
-VEHICLE_WIDTH = 10 / FEET_TO_METERS # width of the vehicle
-VEHICLE_VELOCITY = 8 # m/s
-UPDATE_SPEED = 0.5 # 2 hz
+VEHICLE_LENGTH = 35 / FEET_TO_METERS  # length of the vehicle
+VEHICLE_WIDTH = 10 / FEET_TO_METERS  # width of the vehicle
+VEHICLE_VELOCITY = 8  # m/s
+UPDATE_SPEED = 0.5  # 2 hz
+
+
 def ackermanCircle():
-    ## Questions:
-    # Is alpha up to me to decide or can we try different values?
-    # How do I keep this within the radius of the circle?
-    # Will the skid steer version of this essentially be the same except for the equation modifications? Yes, and to get to the edge we can move forwd.
-    # What is the forward Euler method? 
     x_coordinates = [0]
     y_coordinates = [0]
     theta_history = [0]
     # Move robot to get to the edge of the circle
     getToEdge(x_coordinates, y_coordinates, theta_history)
     moveCircle(x_coordinates, y_coordinates, theta_history)
-    # TODO: Create a function to up to the top. Calculate radius of inner circle to get to the edge, then move over there before starting
     plt.plot(x_coordinates, y_coordinates)
     # plt.savefig("ackerman.png")
     plt.show()
 
+
 def getToEdge(x_coordinates, y_coordinates, theta_history):
     innerRadius = 9
     # alpha is the inverse tangent of the ratio of the length of the vehicle to the radius of the circle
-    alpha = np.arctan(VEHICLE_LENGTH/innerRadius) # equation 1.1
-    seconds = 2 * np.pi * innerRadius / VEHICLE_VELOCITY # 2 pi r / v
-    moveRobot(x_coordinates, y_coordinates, theta_history, seconds/2, alpha)
+    alpha = np.arctan(VEHICLE_LENGTH / innerRadius)  # equation 1.1
+    seconds = 2 * np.pi * innerRadius / VEHICLE_VELOCITY  # 2 pi r / v
+    moveRobot(x_coordinates, y_coordinates, theta_history, seconds / 2, alpha)
+
 
 def moveCircle(x_coordinates, y_coordinates, theta_history, radius=18):
-    seconds = 2 * np.pi * radius / VEHICLE_VELOCITY # 2 pi r / v
-    alpha = np.arctan(VEHICLE_LENGTH/radius) # equation 1.1
+    seconds = 2 * np.pi * radius / VEHICLE_VELOCITY  # 2 pi r / v
+    alpha = np.arctan(VEHICLE_LENGTH / radius)  # equation 1.1
     moveRobot(x_coordinates, y_coordinates, theta_history, seconds, alpha)
-     
-def moveRobot(x_coordinates, y_coordinates, theta_history, number_seconds, alpha):
-        # Equations are from Mobile-Robots
-        for _ in range(int(number_seconds/UPDATE_SPEED)):
-            x_velocity = -VEHICLE_VELOCITY*np.sin(theta_history[-1]) # x dot
-            y_velocity = VEHICLE_VELOCITY*np.cos(theta_history[-1]) # y dot
-            omega = VEHICLE_VELOCITY/VEHICLE_LENGTH*np.tan(alpha) # angular velocity
-            x_next = x_coordinates[-1] + x_velocity*UPDATE_SPEED
-            y_next = y_coordinates[-1] + y_velocity*UPDATE_SPEED
-            theta_next = theta_history[-1] + omega*UPDATE_SPEED
-            x_coordinates.append(x_next)
-            y_coordinates.append(y_next)
-            theta_history.append(theta_next)
 
-def skidSteerMoveCircle(x_coordinates, y_coordinates, theta_history, radius=18):
-        # Equations are from Mobile-Robots 1.11a, 1.11b, and 1.11c
-        # Apply equal force to both wheels
-        seconds = 2 * np.pi * radius / VEHICLE_VELOCITY # 2 pi r / v
-        alpha = np.arctan(VEHICLE_LENGTH/radius) 
-        phi_dot = VEHICLE_VELOCITY/VEHICLE_LENGTH*np.tan(alpha) # angular velocity
-        leftV = phi_dot * (radius-VEHICLE_WIDTH/2) # 1.7a
-        rightV = phi_dot * (radius+VEHICLE_WIDTH/2) # 1.7b
-        for _ in range(int(seconds/UPDATE_SPEED)):
-            x_velocity = - (rightV + leftV ) * np.sin(theta_history[-1])/ 2 # x dot 1.11a
-            y_velocity = (rightV + leftV ) * np.cos(theta_history[-1])/ 2 # y dot 1.11b
-            omega = (rightV - leftV) / VEHICLE_WIDTH # angular velocity
-            x_next = x_coordinates[-1] + x_velocity*UPDATE_SPEED
-            y_next = y_coordinates[-1] + y_velocity*UPDATE_SPEED
-            theta_next = theta_history[-1] + omega*UPDATE_SPEED
-            x_coordinates.append(x_next)
-            y_coordinates.append(y_next)
-            theta_history.append(theta_next)
-        
+
+def moveRobot(x_coordinates, y_coordinates, theta_history, number_seconds, alpha):
+    # Equations are from Mobile-Robots
+    for _ in range(int(number_seconds / UPDATE_SPEED)):
+        x_velocity = -VEHICLE_VELOCITY * np.sin(theta_history[-1])  # x dot
+        y_velocity = VEHICLE_VELOCITY * np.cos(theta_history[-1])  # y dot
+        omega = VEHICLE_VELOCITY / VEHICLE_LENGTH * np.tan(alpha)  # angular velocity
+        x_next = x_coordinates[-1] + x_velocity * UPDATE_SPEED
+        y_next = y_coordinates[-1] + y_velocity * UPDATE_SPEED
+        theta_next = theta_history[-1] + omega * UPDATE_SPEED
+        x_coordinates.append(x_next)
+        y_coordinates.append(y_next)
+        theta_history.append(theta_next)
+
+
 def skidSteer():
     # Skid steer setup will just be move to edge, rotate 90 degrees, then move in a circle
     x_coordinates = [0]
@@ -74,52 +57,111 @@ def skidSteer():
     # Move robot to get to the edge of the circle
     skidSteerGetToEdge(x_coordinates, y_coordinates, theta_history)
     # Now rotate 90 degrees
-    theta_history[-1] += np.pi/2
+    theta_history[-1] += np.pi / 2
     x_coordinates.append(x_coordinates[-1])
     y_coordinates.append(y_coordinates[-1])
     # Complete the circle
     skidSteerMoveCircle(x_coordinates, y_coordinates, theta_history)
     plt.plot(x_coordinates, y_coordinates)
-    plt.savefig("skidSteer.png")
+    # plt.savefig("skidSteer.png")
     plt.show()
+
 
 def skidSteerGetToEdge(x_coordinates, y_coordinates, theta_history):
     moveRobot(x_coordinates, y_coordinates, theta_history, 2, 0)
 
+
+def skidSteerMoveCircle(x_coordinates, y_coordinates, theta_history, radius=18):
+    # Equations are from Mobile-Robots 1.11a, 1.11b, and 1.11c
+    # Apply equal force to both wheels
+    seconds = 2 * np.pi * radius / VEHICLE_VELOCITY  # 2 pi r / v
+    alpha = np.arctan(VEHICLE_LENGTH / radius)
+    phi_dot = VEHICLE_VELOCITY / VEHICLE_LENGTH * np.tan(alpha)  # angular velocity
+    leftV = phi_dot * (radius - VEHICLE_WIDTH / 2)  # 1.7a
+    rightV = phi_dot * (radius + VEHICLE_WIDTH / 2)  # 1.7b
+    for _ in range(int(seconds / UPDATE_SPEED)):
+        x_velocity = -(rightV + leftV) * np.sin(theta_history[-1]) / 2  # x dot 1.11a
+        y_velocity = (rightV + leftV) * np.cos(theta_history[-1]) / 2  # y dot 1.11b
+        omega = (rightV - leftV) / VEHICLE_WIDTH  # angular velocity
+        x_next = x_coordinates[-1] + x_velocity * UPDATE_SPEED
+        y_next = y_coordinates[-1] + y_velocity * UPDATE_SPEED
+        theta_next = theta_history[-1] + omega * UPDATE_SPEED
+        x_coordinates.append(x_next)
+        y_coordinates.append(y_next)
+        theta_history.append(theta_next)
+
+
 def positionalError():
-    # Here we start at the edge of the circle
-    # This is how the robot moves:
+    # Initialize variables:
+    radius = 9  # meters
+    circleSeconds = 2 * np.pi * radius / VEHICLE_VELOCITY  # 2 pi r / v
+    # Get movement data
     x_coordinates = [0]
     y_coordinates = [0]
     theta_history = [0]
-    radius = 9 # meters
     skidSteerMoveCircle(x_coordinates, y_coordinates, theta_history, radius)
-    # Now we calcuate the ground truth arrays
-    circumference = 2 * np.pi * radius  # 2 pi r
+    # Now we compare the robot movement to our ground truth movement at various time intervals
+    differenceCollections = []
+    intervals = [1, 0.5, 0.2, 0.15, 0.1, 0.01]
+    for interval in intervals:
+        start = time.time()
+        differences = errorAtIncrement(
+            interval, x_coordinates, y_coordinates, radius, circleSeconds
+        )
+        differenceCollections.append(differences)
+        end = time.time()
+        print(f"Time taken: {round(end - start, 2)} with interval {interval}")
+        print("Total Error: " + str(round(sum(differences), 3)))
+
+    # See the difference between 0.1 and 0.01 at each point in 0.1
+    # diff = 0
+    # for i in range(len(differenceCollections[1])):
+    #     diff += differenceCollections[1][i] - differenceCollections[2][i*10]
+    # print(f"Total difference between 0.1 and 0.01: {diff}")
+    for diff in differenceCollections:
+        print(max(diff))
+
+    # Plot the differences
+    for differences, interval in zip(differenceCollections, intervals):
+        plt.plot(
+            [i * interval for i in range(int(circleSeconds / interval))],
+            differences,
+            label=f"Interval of {interval} seconds",
+        )
+        plt.xlabel("Time (seconds)")
+        plt.ylabel(f"Max Error (meters)")
+        plt.ylim(0, max(differences) + np.median(differences) / 4)
+        plt.legend()
+    plt.show()
+
+    # plt.savefig(f"totalErrors.png")
+
+
+def errorAtIncrement(
+    incrementSize, x_coordinates, y_coordinates, radius, circleSeconds
+):
+    # We know radius in len(x_coordinates) increments. Convert this to its appropriate interval
+    experimentalTimestamp = int(
+        incrementSize / UPDATE_SPEED
+    )  # measured at update speed for every second. We have 2 measurements per second
+    # Now at each time interval compare computed value to the analytical value
     errors = []
-    for speed in [1, 0.1, 0.01]:
-        difference = errorAtIncrement(speed, x_coordinates, y_coordinates, circumference)
-        errors.append(sum(difference))
-    print("ERRORS: ", errors)
-    plt.plot(errors)
+    for time in range(int(circleSeconds / incrementSize)):
+        computedX, computedY = circle_position(
+            radius, VEHICLE_VELOCITY, time * incrementSize, x0=-radius, y0=0
+        )
+        experimentalX, experimentalY = (
+            x_coordinates[time * experimentalTimestamp],
+            y_coordinates[time * experimentalTimestamp],
+        )
+        error = np.sqrt(
+            (experimentalX - computedX) ** 2 + (experimentalY - computedY) ** 2
+        )
+        errors.append(error)
+    return errors
 
-def errorAtIncrement(incrementSize, x_coordinates, y_coordinates, circumference):
-    groundTruthX = [0]
-    groundTruthY = [0] # Circle starting at 0,0
-    for t in range(int(circumference/VEHICLE_VELOCITY/incrementSize)):
-        x_next, y_next = circle_position(9, VEHICLE_VELOCITY, t)
-        groundTruthX.append(x_next)
-        groundTruthY.append(y_next)
-    # Now we calculate the positional error
-    positionalError = []
-    for i in range(len(groundTruthX)):
-        totalStamps = len(x_coordinates)
-        actualI = int(i * totalStamps / len(groundTruthX))
-        error = np.sqrt((groundTruthX[i]-x_coordinates[actualI])**2 + (groundTruthY[i]-y_coordinates[actualI])**2)
-        positionalError.append(error)
-    return positionalError
 
-def circle_position(radius, velocity, t):
+def circle_position(radius, velocity, t, x0=0, y0=0):
     """
     Calculate the exact x and y coordinates of a point moving in a circle.
 
@@ -132,22 +174,13 @@ def circle_position(radius, velocity, t):
     - x (float): The x-coordinate of the point.
     - y (float): The y-coordinate of the point.
     """
-    # Assumes we are starting from 0,0
+
+    # At time zero this should be returning 0,0
     angular_velocity = velocity / radius  # Angular velocity in radians per second
-    angle = angular_velocity * t         # Angle in radians at time 't'
-    x = radius * np.cos(angle)
-    y = radius * np.sin(angle)
+    angle = angular_velocity * t  # Angle in radians at time 't'
+    x = radius * np.cos(angle) + x0
+    y = radius * np.sin(angle) + y0
     return x, y
-
-
-
-    
-
-    # We know the radius of circle and velocity of robot, meaning at every time step we know what the ground truth is:
-    # Now we simply go along the circle and calculate the error at each time step, and graph it
-    
-    #TODO: Use Euler method to calculate the positional error of the robot
-    # TODO: Graph the rrors for 3 time steps 1, 0.1, and 0.01
 
 
 def main():
