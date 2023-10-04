@@ -111,15 +111,7 @@ def positionalError():
         differenceCollections.append(differences)
         end = time.time()
         print(f"Time taken: {round(end - start, 2)} with interval {interval}")
-        print("Total Error: " + str(round(sum(differences), 3)))
-
-    # See the difference between 0.1 and 0.01 at each point in 0.1
-    # diff = 0
-    # for i in range(len(differenceCollections[1])):
-    #     diff += differenceCollections[1][i] - differenceCollections[2][i*10]
-    # print(f"Total difference between 0.1 and 0.01: {diff}")
-    for diff in differenceCollections:
-        print(max(diff))
+        print(f"Total Error: {sum(differences)} Max error: {max(differences)}")
 
     # Plot the differences
     for differences, interval in zip(differenceCollections, intervals):
@@ -132,7 +124,7 @@ def positionalError():
         plt.ylabel(f"Max Error (meters)")
         plt.ylim(0, max(differences) + np.median(differences) / 4)
         plt.legend()
-    plt.show()
+    # plt.show()
 
     # plt.savefig(f"totalErrors.png")
 
