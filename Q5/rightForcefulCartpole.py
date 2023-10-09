@@ -14,7 +14,7 @@ from gym.envs.classic_control import utils
 from gym.error import DependencyNotInstalled
 
 
-class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
+class RightCartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
     """
     ### Description
 
@@ -93,13 +93,13 @@ class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         self.total_mass = self.masspole + self.masscart
         self.length = 0.5  # actually half the pole's length
         self.polemass_length = self.masspole * self.length
-        self.left_force_mag = 10.0 # Change the right to be 50% greater than the left
+        self.left_force_mag = 10.0  # Change the right to be 50% greater than the left
         self.right_force_mag = 15.0
         self.tau = 0.02  # seconds between state updates
         self.kinematics_integrator = "euler"
 
         # Angle at which to fail the episode
-        self.theta_threshold_radians = 12 * 2 * math.pi / 360
+        self.theta_threshold_radians = 35 * 2 * math.pi / 360
         self.x_threshold = 2.4
 
         # Angle limit set to 2 * theta_threshold_radians so failing observation
