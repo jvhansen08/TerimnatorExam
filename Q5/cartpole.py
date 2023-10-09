@@ -24,6 +24,7 @@ def evaluateModel(env, model):
         if len(state) == 2:
             state = state[0]
         done = False
+        # Put a limit of 500 steps to get an average. If it can do 500, it can go virtually forever
         while not done and localReward < 500:
             action, _ = model.predict(state)
             next_state, reward, done, info, _ = env.step(action)
