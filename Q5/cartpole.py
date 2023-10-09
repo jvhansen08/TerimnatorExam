@@ -2,6 +2,7 @@ import gym
 import numpy as np
 import tensorflow as tf
 import gym.wrappers
+from gym.envs.classic_control import cartpole
 
 # Create the CartPole-v1 environment
 env = gym.make("CartPole-v1")
@@ -107,6 +108,12 @@ def displayModel():
         next_state = np.reshape(next_state, [1, 4])
         state = next_state
     env.close()
+
+class CustomCartpole(gym.envs.toy_text.cartpole.CartPoleEnv):
+    def __init__(self, desc=None):
+        super().__init__(desc=desc, )
+
+        
 
 
 if __name__ == "__main__":
