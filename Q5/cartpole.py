@@ -38,7 +38,7 @@ def evaluateModel(env, model):
     env.close()
 
 
-def displayModel(env, model):
+def displayModel(env=RightCartPoleEnv(), model=PPO.load("ppo_right_cartpole")):
     # Display the trained model
     print("Displaying model")
     env.render_mode = "human"
