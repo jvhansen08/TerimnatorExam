@@ -4,13 +4,16 @@ PyOpenGL
 PyOpenGL-accelerate
 pyglet
 pygame
+pandas
 stable_baselines3
 tensorflow
 shimmy
 tqdm
 rich
 optuna
+scikit-learn
 opencv-python
 fer
+neattext
 matplotlib
 psutil
