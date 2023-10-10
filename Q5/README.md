@@ -9,3 +9,5 @@ python3 main.py
 ```
 
 This will play through the cartpole simulation using the ml model, and then the frozenlake model.
+
+The questions are answered in the `Q5.md` file.
