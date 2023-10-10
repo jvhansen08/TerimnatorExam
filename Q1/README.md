@@ -2,13 +2,13 @@
 
 Be sure to use the installation [instructions](../README.md) found in the root of this repository.
 
-To run the simulation, execute this command from the root of the repository:
+To run the simulation, execute this command from the within the `Q1` directory:
 
 ```bash
-python3 Q1/demo.py
+python3 demo.py
 ```
 
-This will first play a demo to see what it is like without any guidance, then go through the PID controller and the ML model response.
+This will play through the simulation using the ml model, the controller, and the default non-trained model to show the difference between the three.
 
 # Citations:
 

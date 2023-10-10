@@ -69,6 +69,7 @@ def trainAgent():
     model = model.learn(total_timesteps=100000, progress_bar=True)
     model.save("ppo_cartpole_85")
     env.close()
+    return model
 
 
 def evaluateTrainedAgent(episodes=10, maxSteps=None):

@@ -17,3 +17,4 @@ fer
 neattext
 matplotlib
 psutil
+seaborn
