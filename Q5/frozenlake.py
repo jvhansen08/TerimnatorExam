@@ -42,8 +42,6 @@ from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 from customFrozenlake import CustomFrozenLakeEnv
 
 
-sns.set_theme()
-
 # %load_ext lab_black
 
 
@@ -68,42 +66,19 @@ class Params(NamedTuple):
     savefig_folder: Path  # Root folder where plots are saved
 
 
-params = Params(
-    total_episodes=2000,
-    learning_rate=0.8,
-    gamma=0.95,
-    epsilon=0.1,
-    map_size=8,
-    seed=123,
-    is_slippery=False,
-    n_runs=20,
-    action_size=None,
-    state_size=None,
-    proba_frozen=0.9,
-    savefig_folder=Path("../../_static/img/tutorials/"),
-)
-params
-
-# Set the seed
-rng = np.random.default_rng(params.seed)
-
-# Create the figure folder if it doesn't exists
-params.savefig_folder.mkdir(parents=True, exist_ok=True)
-
-
 # %%
 # The FrozenLake environment
 # --------------------------
 #
 
-env = gym.make(
-    "FrozenLake-v1",
-    is_slippery=params.is_slippery,
-    render_mode="rgb_array",
-    desc=generate_random_map(
-        size=params.map_size, p=params.proba_frozen, seed=params.seed
-    ),
-)
+# env = gym.make(
+#     "FrozenLake-v1",
+#     is_slippery=params.is_slippery,
+#     render_mode="rgb_array",
+#     desc=generate_random_map(
+#         size=params.map_size, p=params.proba_frozen, seed=params.seed
+#     ),
+# )
 
 
 # %%
@@ -115,12 +90,6 @@ env = gym.make(
 # can have a look at the `References section <#References>`__ for some
 # refreshers on the theory. Now, let's create our Q-table initialized at
 # zero with the states number as rows and the actions number as columns.
-#
-
-params = params._replace(action_size=env.action_space.n)
-params = params._replace(state_size=env.observation_space.n)
-print(f"Action size: {params.action_size}")
-print(f"State size: {params.state_size}")
 
 
 class Qlearning:
@@ -147,13 +116,14 @@ class Qlearning:
 
 
 class EpsilonGreedy:
-    def __init__(self, epsilon):
+    def __init__(self, epsilon, rng):
         self.epsilon = epsilon
+        self.rng = rng
 
     def choose_action(self, action_space, state, qtable):
         """Choose an action `a` in the current world state (s)."""
         # First we randomize a number
-        explor_exploit_tradeoff = rng.uniform(0, 1)
+        explor_exploit_tradeoff = self.rng.uniform(0, 1)
 
         # Exploration
         if explor_exploit_tradeoff < self.epsilon:
@@ -178,16 +148,6 @@ class EpsilonGreedy:
 # Let's instantiate the learner and the explorer.
 #
 
-learner = Qlearning(
-    learning_rate=params.learning_rate,
-    gamma=params.gamma,
-    state_size=params.state_size,
-    action_size=params.action_size,
-)
-explorer = EpsilonGreedy(
-    epsilon=params.epsilon,
-)
-
 
 # %%
 # This will be our main function to run our environment until the maximum
@@ -196,7 +156,7 @@ explorer = EpsilonGreedy(
 #
 
 
-def run_env():
+def run_env(env, learner, explorer, params):
     rewards = np.zeros((params.total_episodes, params.n_runs))
     steps = np.zeros((params.total_episodes, params.n_runs))
     episodes = np.arange(params.total_episodes)
@@ -310,7 +270,7 @@ def qtable_directions_map(qtable, map_size):
 #
 
 
-def plot_q_values_map(qtable, env, map_size):
+def plot_q_values_map(qtable, env, map_size, params):
     """Plot the last frame of the simulation and the policy learned."""
     qtable_val_max, qtable_directions = qtable_directions_map(qtable, map_size)
 
@@ -348,7 +308,7 @@ def plot_q_values_map(qtable, env, map_size):
 #
 
 
-def plot_states_actions_distribution(states, actions, map_size):
+def plot_states_actions_distribution(states, actions, map_size, params):
     """Plot the distributions of states and actions."""
     labels = {"LEFT": 0, "DOWN": 1, "RIGHT": 2, "UP": 3}
 
@@ -364,17 +324,33 @@ def plot_states_actions_distribution(states, actions, map_size):
     plt.show()
 
 
+def plot_steps_and_rewards(rewards_df, steps_df, params):
+    """Plot the steps and rewards from dataframes."""
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(15, 5))
+    sns.lineplot(
+        data=rewards_df, x="Episodes", y="cum_rewards", hue="map_size", ax=ax[0]
+    )
+    ax[0].set(ylabel="Cumulated rewards")
+
+    sns.lineplot(data=steps_df, x="Episodes", y="Steps", hue="map_size", ax=ax[1])
+    ax[1].set(ylabel="Averaged steps number")
+
+    for axi in ax:
+        axi.legend(title="map size")
+    fig.tight_layout()
+    img_title = "frozenlake_steps_and_rewards.png"
+    fig.savefig(params.savefig_folder / img_title, bbox_inches="tight")
+    plt.show()
+
+
 # %%
 # Now we'll be running our agent on a few increasing maps sizes: -
 #
 # Putting it all together:
 #
-map_sizes = [8]  # We only want to run this on an 8x8 map
-res_all = pd.DataFrame()
-st_all = pd.DataFrame()
 
 
-def train_run_eval_env(env):
+def train_run_eval_env(env, res_all, st_all, params, map_size, rng):
     params = params._replace(action_size=env.action_space.n)
     params = params._replace(state_size=env.observation_space.n)
     env.action_space.seed(
@@ -388,10 +364,13 @@ def train_run_eval_env(env):
     )
     explorer = EpsilonGreedy(
         epsilon=params.epsilon,
+        rng=rng,
     )
 
     print(f"Map size: {map_size}x{map_size}")
-    rewards, steps, episodes, qtables, all_states, all_actions = run_env()
+    rewards, steps, episodes, qtables, all_states, all_actions = run_env(
+        env, learner, explorer, params
+    )
 
     # Save the results in dataframes
     res, st = postprocess(episodes, params, rewards, steps, map_size)
@@ -400,15 +379,38 @@ def train_run_eval_env(env):
     qtable = qtables.mean(axis=0)  # Average the Q-table between runs
 
     plot_states_actions_distribution(
-        states=all_states, actions=all_actions, map_size=map_size
+        states=all_states, actions=all_actions, map_size=map_size, params=params
     )  # Sanity check
-    plot_q_values_map(qtable, env, map_size)
-
+    plot_q_values_map(qtable, env, map_size, params=params)
     env.close()
 
 
-for map_size in map_sizes:
+def main():
+    sns.set_theme()
+    res_all = pd.DataFrame()
+    st_all = pd.DataFrame()
     print("Putting it all together")
+    params = Params(
+        total_episodes=2000,
+        learning_rate=0.8,
+        gamma=0.95,
+        epsilon=0.1,
+        map_size=8,
+        seed=123,
+        is_slippery=False,
+        n_runs=20,
+        action_size=None,
+        state_size=None,
+        proba_frozen=0.9,
+        savefig_folder=Path("./images"),
+    )
+    # Set the seed
+    rng = np.random.default_rng(params.seed)
+    # Create the figure folder if it doesn't exists
+    params.savefig_folder.mkdir(parents=True, exist_ok=True)
+    print(f"Action size: {params.action_size}")
+    print(f"State size: {params.state_size}")
+    map_size = 8
     normalEnv = gym.make(
         "FrozenLake-v1",
         is_slippery=params.is_slippery,
@@ -424,11 +426,21 @@ for map_size in map_sizes:
             size=map_size, p=params.proba_frozen, seed=params.seed
         ),
     )
-    print("--- Running Normal Env ---")
-    train_run_eval_env(normalEnv)
-    print(" --- Running Custom Env ---")
-    train_run_eval_env(customEnv)
+    for index, env in enumerate([normalEnv, customEnv]):
+        params = params._replace(action_size=env.action_space.n)
+        params = params._replace(state_size=env.observation_space.n)
+        if index == 0:
+            print("--- Running Normal Env ---")
+        else:
+            continue
+            print(" --- Running Custom Env ---")
+        train_run_eval_env(
+            env, res_all, st_all, params=params, map_size=map_size, rng=rng
+        )
 
+
+if __name__ == "__main__":
+    main()
 
 # %%
 # Map size: :math:`4 \times 4`
@@ -507,26 +519,7 @@ for map_size in map_sizes:
 #
 
 
-def plot_steps_and_rewards(rewards_df, steps_df):
-    """Plot the steps and rewards from dataframes."""
-    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(15, 5))
-    sns.lineplot(
-        data=rewards_df, x="Episodes", y="cum_rewards", hue="map_size", ax=ax[0]
-    )
-    ax[0].set(ylabel="Cumulated rewards")
-
-    sns.lineplot(data=steps_df, x="Episodes", y="Steps", hue="map_size", ax=ax[1])
-    ax[1].set(ylabel="Averaged steps number")
-
-    for axi in ax:
-        axi.legend(title="map size")
-    fig.tight_layout()
-    img_title = "frozenlake_steps_and_rewards.png"
-    fig.savefig(params.savefig_folder / img_title, bbox_inches="tight")
-    plt.show()
-
-
-plot_steps_and_rewards(res_all, st_all)
+# plot_steps_and_rewards(res_all, st_all)
 
 
 # %%
