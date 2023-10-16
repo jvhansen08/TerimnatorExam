@@ -44,11 +44,12 @@ Question 8:
 -
 
 ## Mapping Tips (October 9 2023, 9:50 AM)
+
 ### You have a map
 
-- Option 1) Choose to plan to the goal. If you do that, then you assume everything else is empty space and avoid seen obstacles. Assume empty space, every 1-2 seconds replan. 
+- Option 1) Choose to plan to the goal. If you do that, then you assume everything else is empty space and avoid seen obstacles. Assume empty space, every 1-2 seconds replan.
 - Option 2) Faster, take me to the best place given whatever horizon I can plan at. Based on either sensor range or compute stack (if we can only plan 20meters in .5 seconds, then we only have 10 seconds). Plan to the computational limit that is closest to the goal.
-- Option 3) If you trust the room and the robot, then you can plan a 1 shot movement. Let the robot go, send a message back to the computer to compute where we are, and then send the location back to the robot. 
+- Option 3) If you trust the room and the robot, then you can plan a 1 shot movement. Let the robot go, send a message back to the computer to compute where we are, and then send the location back to the robot.
 - For moving the ball: A potential field planner is not the end of the world. More dynamic in how it plans
 
 ### You don't have a map (October 9 2023, 10:00 AM)
@@ -56,8 +57,15 @@ Question 8:
 - We don't generally trust the map we are given. Compute everything based on the sensors. All we focus on is whether there is an obstacle nearby. We are not making a map and not using as much memory.
 - The more sensors on a robot the more time to process the data and setting up configuration.
 
+## Image Recognition (Wednesday October 11 2023)
 
-
+- Flat image for OrbSlam
+- Feature extraction: matrices multiplied to images to createa modified image of some sort.
+  - Convultional networks are a type of feature extraction. They create a blurred version of the original image. The kernel can be changed to recognize edges vs blur.
+- Convert to grayscale before trying to find the edges
+- Bluering will make it easier to find the edges. So convert to grayscale, then blur.
+- Canny edge detection is most common, lieklly will be better than Sobel because Sobel finds all of the edges, while Canny removes false positives
+-
 
 # Stamp
 
