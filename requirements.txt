@@ -18,3 +18,4 @@ neattext
 matplotlib
 psutil
 seaborn
+h5py
