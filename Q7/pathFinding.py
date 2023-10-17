@@ -52,7 +52,7 @@ def astar(grid, start, goal, moves):
                 and 0 <= new_y < len(grid[0])
                 and grid[new_x][new_y] != -1
             ):
-                tentative_g_score = g_score[current_pos] + 2
+                tentative_g_score = g_score[current_pos] + 1
                 cost = calculate_move_cost(new_x, new_y, current_pos, grid)
                 tentative_g_score += cost
                 if (new_x, new_y) not in g_score or tentative_g_score < g_score[
@@ -87,15 +87,6 @@ def calculate_move_cost(new_x, new_y, current_pos, grid):
     return cost
 
 
-def calculate_path_cost(path, grid):
-    totalCost = 0
-    prevX, prevY = path[0]  # start at 0,0
-    for x, y in path:
-        totalCost += calculate_move_cost(x, y, (prevX, prevY), grid)
-        prevX, prevY = x, y
-    return totalCost
-
-
 if __name__ == "__main__":
     start = (0, 0)
     goal = (6, 5)
@@ -105,7 +96,6 @@ if __name__ == "__main__":
     # Find the optimal path
     optimal_path = astar(grid, start, goal, moves)
     print(f"Optimal path: {optimal_path}")
-    print(f"Path cost: {calculate_path_cost(optimal_path, grid)}")
 
     # Visualize the path on the grid
     if optimal_path:
