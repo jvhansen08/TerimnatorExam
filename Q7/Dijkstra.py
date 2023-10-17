@@ -229,15 +229,7 @@ class Dijkstra:
 
 
 class CustomDijkstraPlanner(Dijkstra):
-    def heuristic(self, node):
-        # Dijkstra doesn't use a heuristic, so return 0.
-        return 0
-
-    def step(self, current, neighbor):
-        # Dijkstra: No specific step, just move towards neighbors
-        return neighbor
-
-    def plan(self, sx, sy, gx, gy, show_animation=True):
+    def plan(self, sx, sy, gx, gy, show_animation):
         return super().planning(sx, sy, gx, gy, show_animation)
 
     def graph(self, rx, ry):
