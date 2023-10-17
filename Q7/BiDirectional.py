@@ -129,7 +129,7 @@ class BidirectionalAStarPlanner:
                     plt.pause(0.001)
 
             if current_A.x == current_B.x and current_A.y == current_B.y:
-                print("Found goal")
+                # print("Found goal")
                 meet_point_A = current_A
                 meet_point_B = current_B
                 break
@@ -283,15 +283,15 @@ class BidirectionalAStarPlanner:
         self.min_y = round(min(oy))
         self.max_x = round(max(ox))
         self.max_y = round(max(oy))
-        print("min_x:", self.min_x)
-        print("min_y:", self.min_y)
-        print("max_x:", self.max_x)
-        print("max_y:", self.max_y)
+        # print("min_x:", self.min_x)
+        # print("min_y:", self.min_y)
+        # print("max_x:", self.max_x)
+        # print("max_y:", self.max_y)
 
         self.x_width = round((self.max_x - self.min_x) / self.resolution)
         self.y_width = round((self.max_y - self.min_y) / self.resolution)
-        print("x_width:", self.x_width)
-        print("y_width:", self.y_width)
+        # print("x_width:", self.x_width)
+        # print("y_width:", self.y_width)
 
         # obstacle map generation
         self.obstacle_map = [
@@ -332,3 +332,4 @@ class CustomBiDirectional(BidirectionalAStarPlanner):
         plt.plot(rx, ry, "-r")
         plt.grid(True)
         plt.show()
+        # plt.savefig("BiDirectional.png")

@@ -108,7 +108,7 @@ class BreadthFirstSearchPlanner:
                     plt.pause(0.001)
 
             if current.x == ngoal.x and current.y == ngoal.y:
-                print("Find goal")
+                # print("Find goal")
                 ngoal.parent_index = current.parent_index
                 ngoal.cost = current.cost
                 break
@@ -189,15 +189,15 @@ class BreadthFirstSearchPlanner:
         self.miny = round(min(oy))
         self.maxx = round(max(ox))
         self.maxy = round(max(oy))
-        print("min_x:", self.minx)
-        print("min_y:", self.miny)
-        print("max_x:", self.maxx)
-        print("max_y:", self.maxy)
+        # print("min_x:", self.minx)
+        # print("min_y:", self.miny)
+        # print("max_x:", self.maxx)
+        # print("max_y:", self.maxy)
 
         self.xwidth = round((self.maxx - self.minx) / self.reso)
         self.ywidth = round((self.maxy - self.miny) / self.reso)
-        print("x_width:", self.xwidth)
-        print("y_width:", self.ywidth)
+        # print("x_width:", self.xwidth)
+        # print("y_width:", self.ywidth)
 
         # obstacle map generation
         self.obmap = [[False for _ in range(self.ywidth)] for _ in range(self.xwidth)]
@@ -236,3 +236,4 @@ class CustomBFSPlanner(BreadthFirstSearchPlanner):
         plt.plot(rx, ry, "-r")
         plt.grid(True)
         plt.show()
+        # plt.savefig("BFS.png")
