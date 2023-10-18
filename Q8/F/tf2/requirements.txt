@@ -1,0 +1,6 @@
+numpy
+tensorflow
+imageio
+matplotlib
+tqdm
+Pillow==9.5.0
