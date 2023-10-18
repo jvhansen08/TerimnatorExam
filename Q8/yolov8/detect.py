@@ -26,3 +26,21 @@ start = time.time()
 
 # Use the model to detect objects
 model.predict(source="./grocerystore/", project='./ultralytics', name='detections', save=True)
+
+# End measuring time
+end = time.time()
+
+# Stop the CPU monitoring thread
+stop_monitoring = True
+cpu_monitoring_thread.join()
+#photo count for fps
+import os
+path, dirs, files = next(os.walk("./ultralytics/detections"))
+file_count = len(files)
+fps = file_count/(end-start)
+
+print("FPS: {:.2f}".format(fps))
+
+# Calculate average CPU usage
+average_cpu_usage = sum(cpu_percentages) / len(cpu_percentages)
+print("CPU usage: {:.2f}%".format(average_cpu_usage))
