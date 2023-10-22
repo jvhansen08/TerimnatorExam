@@ -25,7 +25,7 @@ cpu_monitoring_thread.start()
 start = time.time()
 
 # Use the model to detect objects
-model.predict(source="./grocerystore/", project='./ultralytics', name='classifications', save=True)
+model.predict(source="./subset/", project='./ultralytics', name='classifications', save=True)
 
 # End measuring time
 end = time.time()
@@ -35,7 +35,7 @@ stop_monitoring = True
 cpu_monitoring_thread.join()
 #photo count for fps
 import os
-path, dirs, files = next(os.walk("./ultralytics/detections"))
+path, dirs, files = next(os.walk("./ultralytics/classifications"))
 file_count = len(files)
 fps = file_count/(end-start)
 
