@@ -89,7 +89,7 @@ def runPlanners(
         # Reset the plot
         totalCost = 0
         totalTime = 0
-        iterations = 1
+        iterations = 10
         for i in range(iterations):
             plt.clf()
             plotBoard(ox, oy, sx, sy, gx, gy)
@@ -99,7 +99,7 @@ def runPlanners(
             )  # Initialize the planner
             rx, ry = planner.plan(sx, sy, gx, gy, show_animation)
             finishTime = time.time()
-            planner.graph(rx, ry)
+            # planner.graph(rx, ry)
             cost = analyzeCost(rx, ry)
             totalCost += cost
             totalTime += finishTime - startTime

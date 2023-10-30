@@ -5,9 +5,10 @@ import math
 """
 Used implementation found here: https://medium.com/@nicholas.w.swift/easy-a-star-pathfinding-7e6689c7f7b2
 
-And matched the formatting to be similar to the other planners written by 
+And matched the formatting to be similar to the other planners by Atushi Sakai
 
 """
+
 
 class VanillaAStar:
     def __init__(self, ox, oy, resolution, rr):
