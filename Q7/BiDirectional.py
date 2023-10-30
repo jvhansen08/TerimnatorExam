@@ -328,8 +328,9 @@ class CustomBiDirectional(BidirectionalAStarPlanner):
     def plan(self, sx, sy, gx, gy, show_animation):
         return super().planning(sx, sy, gx, gy, show_animation)
 
-    def graph(self, rx, ry):
+    def graph(self, rx, ry, save):
         plt.plot(rx, ry, "-r")
         plt.grid(True)
         plt.show()
-        # plt.savefig("BiDirectional.png")
+        if save:
+            plt.savefig("BiDirectional.png")

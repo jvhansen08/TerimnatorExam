@@ -512,10 +512,11 @@ class CustomRRTStar(RRTStar):
     def plan(self, show_animation, logs=False):
         return super().planning(show_animation, logs)
 
-    def graph(self, path):
+    def graph(self, path, save):
         super().draw_graph()
         plt.plot([x for (x, y) in path], [y for (x, y) in path], "-r")
         plt.grid(True)
         plt.pause(0.01)
         plt.show()
-        # plt.savefig("rrtstar.png")
+        if save:
+            plt.savefig("rrtstar.png")

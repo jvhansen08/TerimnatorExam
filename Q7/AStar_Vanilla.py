@@ -209,8 +209,9 @@ class VanillaAStar:
 
         return motion
 
-    def graph(self, rx, ry):
+    def graph(self, rx, ry, save=False):
         plt.plot(rx, ry, "-r")
         plt.grid(True)
         plt.show()
-        # plt.savefig("AStarVanilla.png")
+        if save:
+            plt.savefig("AStarVanilla.png")

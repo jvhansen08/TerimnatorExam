@@ -70,7 +70,7 @@ def runRRtStar(obsList, start, goal, robot_radius, show_animation):
         cost = analyzeCost(path[0], path[1])
         totalCost += cost
         totalTime += finishTime - startTime
-        planner.graph(path)
+        planner.graph(path, show_animation)
     print(
         f"| RRT Star | {round(totalTime/iterations, 2)} | {round(totalCost/iterations,2)} |"
     )
@@ -80,16 +80,16 @@ def runPlanners(
     ox, oy, sx, sy, gx, gy, robot_radius, show_animation, resolution, obsList
 ):
     for algorithm in [
-        # CustomDijkstraPlanner,
-        # CustomAStarPlanner,
-        # CustomBFSPlanner,
-        # CustomBiDirectional,
-        VanillaAStar
+        CustomDijkstraPlanner,
+        CustomAStarPlanner,
+        CustomBFSPlanner,
+        CustomBiDirectional,
+        VanillaAStar,
     ]:
         # Reset the plot
         totalCost = 0
         totalTime = 0
-        iterations = 10
+        iterations = 1
         for i in range(iterations):
             plt.clf()
             plotBoard(ox, oy, sx, sy, gx, gy)
@@ -99,14 +99,14 @@ def runPlanners(
             )  # Initialize the planner
             rx, ry = planner.plan(sx, sy, gx, gy, show_animation)
             finishTime = time.time()
-            # planner.graph(rx, ry)
+            planner.graph(rx, ry, show_animation)
             cost = analyzeCost(rx, ry)
             totalCost += cost
             totalTime += finishTime - startTime
         print(
             f"| {algorithm.__name__} | {round(totalTime/iterations, 2)} | {round(totalCost/iterations, 2)} |"
         )
-    # runRRtStar(obsList, [sx, sy], [gx, gy], robot_radius, show_animation)
+    runRRtStar(obsList, [sx, sy], [gx, gy], robot_radius, show_animation)
 
 
 def analyzeCost(rx, ry):
