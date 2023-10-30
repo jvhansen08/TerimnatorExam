@@ -3,6 +3,7 @@ from AStar import CustomAStarPlanner
 from BiDirectional import CustomBiDirectional
 from BFSPlanner import CustomBFSPlanner
 from RRTStar import CustomRRTStar
+from AStar_Vanilla import VanillaAStar
 import matplotlib.pyplot as plt
 import math
 import time
@@ -75,12 +76,15 @@ def runRRtStar(obsList, start, goal, robot_radius, show_animation):
     )
 
 
-def runPlanners(ox, oy, sx, sy, gx, gy, robot_radius, show_animation, resolution):
+def runPlanners(
+    ox, oy, sx, sy, gx, gy, robot_radius, show_animation, resolution, obsList
+):
     for algorithm in [
-        CustomDijkstraPlanner,
-        CustomAStarPlanner,
-        CustomBFSPlanner,
-        CustomBiDirectional,
+        # CustomDijkstraPlanner,
+        # CustomAStarPlanner,
+        # CustomBFSPlanner,
+        # CustomBiDirectional,
+        VanillaAStar
     ]:
         # Reset the plot
         totalCost = 0
@@ -102,6 +106,7 @@ def runPlanners(ox, oy, sx, sy, gx, gy, robot_radius, show_animation, resolution
         print(
             f"| {algorithm.__name__} | {round(totalTime/iterations, 2)} | {round(totalCost/iterations, 2)} |"
         )
+    # runRRtStar(obsList, [sx, sy], [gx, gy], robot_radius, show_animation)
 
 
 def analyzeCost(rx, ry):
@@ -117,8 +122,9 @@ def main():
     show_animation = True
     ox, oy, sx, sy, gx, gy = createGrid(True)
     obsList = [[ox[i], oy[i], 1] for i in range(len(ox))]
-    runPlanners(ox, oy, sx, sy, gx, gy, robot_radius, show_animation, resolution)
-    runRRtStar(obsList, [sx, sy], [gx, gy], robot_radius, show_animation)
+    runPlanners(
+        ox, oy, sx, sy, gx, gy, robot_radius, show_animation, resolution, obsList
+    )
 
 
 if __name__ == "__main__":
