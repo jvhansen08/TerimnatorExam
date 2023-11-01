@@ -5,7 +5,7 @@ from cartpole import noTraining
 
 def main():
     print("\n---- Demoing the model with a PID controller ----\n")
-    evaluatePIDController(human=True)
+    # evaluatePIDController(human=True)
     print("\n---- Demoing the model with training ----\n")
     displayAgent()
     print("\n---- Demoing the model without training or a controller ----\n")

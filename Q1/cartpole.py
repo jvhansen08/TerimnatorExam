@@ -12,8 +12,7 @@ from gym.envs.classic_control import utils
 from gym.error import DependencyNotInstalled
 import time
 import gym.wrappers
-
-SEED = 85
+SEED = 85  # Dr. Mario suggested doing this after class on September 15th
 
 
 class CartPoleEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):

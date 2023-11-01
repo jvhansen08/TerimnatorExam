@@ -10,6 +10,8 @@ python3 demo.py
 
 This will play through the simulation using the ml model, the controller, and the default non-trained model to show the difference between the three.
 
+If you would like to execute the trained model, execute, comment out the first lines of the demo and run the demo again.
+
 # Citations:
 
 - [Medium](https://medium.com/dabbler-in-de-stress/the-inverted-pendulum-problem-with-deep-reinforcement-learning-9f149b68c018)
